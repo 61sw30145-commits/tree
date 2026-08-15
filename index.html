@@ -10,11 +10,22 @@
       body * { visibility: hidden; }
       #print-area, #print-area * { visibility: visible; }
       #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+      #back-button-container { display: none !important; }
     }
     #webcam { transform: scaleX(-1); }
   </style>
 </head>
-<body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col items-center justify-center p-4 relative">
+
+  <!-- ปุ่มย้อนกลับ (ซ่อนอยู่ในหน้าแรก) -->
+  <div id="back-button-container" class="absolute top-6 left-6 hidden">
+    <button onclick="goBack()" class="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 rounded-full shadow-sm hover:border-stone-800 transition text-sm font-medium text-stone-700">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      ย้อนกลับ
+    </button>
+  </div>
 
   <!-- Step 1: หน้าแรก -->
   <div id="step-1" class="text-center space-y-6">
@@ -23,10 +34,7 @@
   </div>
 
   <!-- Step Shots: เลือกจำนวนช็อต (1 หรือ 3) -->
-  <div id="step-shots" class="hidden text-center space-y-6 w-full max-w-md relative">
-    <button onclick="goToStep(1)" class="absolute -top-10 left-0 text-sm text-stone-500 hover:text-stone-800 flex items-center gap-1 transition">
-      ← ย้อนกลับ
-    </button>
+  <div id="step-shots" class="hidden text-center space-y-6 w-full max-w-md">
     <h2 class="text-2xl font-light">เลือกจำนวนช็อต</h2>
     <div class="grid grid-cols-2 gap-4">
       <button onclick="selectShots(1)" class="p-6 border border-stone-200 bg-white rounded-2xl hover:border-stone-800 hover:shadow-md transition flex flex-col items-center space-y-3">
@@ -35,6 +43,360 @@
         </div>
         <span class="font-medium text-stone-700">1 ช็อต</span>
       </button>
+
+      <button onclick="selectShots(3)" class="p-6 border border-stone-200 bg-white rounded-2xl hover:border-stone-800 hover:shadow-md transition flex flex-col items-center space-y-3">
+        <div class="w-16 h-20 bg-stone-100 border border-stone-300 rounded flex flex-col justify-between p-1">
+          <div class="w-full h-4 bg-stone-300 rounded-sm"></div>
+          <div class="w-full h-4 bg-stone-300 rounded-sm"></div>
+          <div class="w-full h-4 bg-stone-300 rounded-sm"></div>
+        </div>
+        <span class="font-medium text-stone-700">3 ช็อต</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 2: เลือกกรอบรูป -->
+  <div id="step-2" class="hidden text-center space-y-6 w-full max-w-lg">
+    <h2 id="frame-title" class="text-2xl font-light">เลือกกรอบรูป</h2>
+    <div id="frame-list" class="grid grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto p-2"></div>
+  </div>
+
+  <!-- Step 3: กล้อง & เลือกแก้ไขรูป -->
+  <div id="step-3" class="hidden text-center space-y-4 w-full max-w-md">
+    <div class="relative w-full bg-black rounded-lg overflow-hidden shadow-sm flex items-center justify-center">
+      <video id="webcam" autoplay playsinline class="w-full h-auto object-contain"></video>
+
+      <div id="camera-guide" class="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
+        <div id="guide-box" class="w-full aspect-[700/550] border-2 border-dashed border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.4)] relative flex items-center justify-center">
+          <span class="text-xs text-white/70 bg-black/40 px-2 py-0.5 rounded backdrop-blur-sm absolute top-2">ให้อยู่ในกรอบนี้</span>
+        </div>
+      </div>
+
+      <img id="shot-preview-overlay" class="absolute inset-0 w-full h-full object-contain hidden z-20" />
+      <div id="countdown" class="absolute inset-0 flex items-center justify-center text-6xl font-bold text-white bg-black/40 hidden z-30">3</div>
+    </div>
+    
+    <div id="retake-controls" class="hidden space-y-3">
+      <p class="text-sm font-medium text-stone-700">กดที่รูปเพื่อถ่ายใหม่เฉพาะช็อตนั้น:</p>
+      <div id="shots-preview" class="flex justify-center gap-2 flex-wrap"></div>
+      <button onclick="goToStep(4)" class="px-6 py-2 bg-stone-800 text-white rounded-full">ยืนยันรูปภาพ</button>
+    </div>
+  </div>
+
+  <!-- Step 4: สั่งปริ้นท์ -->
+  <div id="step-4" class="hidden text-center space-y-6 w-full max-w-md">
+    <h2 class="text-2xl font-light">สั่งปริ้นท์รูปภาพ</h2>
+    
+    <div id="print-area" class="flex justify-center">
+      <canvas id="final-canvas" class="max-w-full rounded shadow-md"></canvas>
+    </div>
+
+    <div class="flex items-center justify-center gap-4">
+      <button onclick="window.print()" class="px-6 py-2 bg-stone-800 text-white rounded-full">สั่งปริ้นท์</button>
+      <button onclick="goToStep(3)" class="px-6 py-2 border border-stone-800 rounded-full">แก้ไขรูปภาพ</button>
+    </div>
+  </div>
+
+  <script>
+    let currentStep = 1;
+    let stepHistory = [1];
+    let selectedFrame = null;
+    let targetShots = 3;
+    let capturedImages = [];
+    let captureTimer = null;
+    let isCapturing = false;
+
+    let frames = [
+      { id: 1, name: "1 ช็อต - กรอบใหญ่ 1", file: "frame_1shot_1.png", shots: 1 },
+      { id: 2, name: "1 ช็อต - กรอบใหญ่ 2", file: "frame_1shot_2.png", shots: 1 },
+      { id: 3, name: "บัวหลวงใหญ่", file: "frame1.png", shots: 3 },
+      { id: 4, name: "กรอบสีดำ", file: "frame2.png", shots: 3 },
+      { id: 5, name: "กรอบสีฟ้า", file: "frame3.png", shots: 3 },
+      { id: 6, name: "ใบเสร็จ", file: "frame4.png", shots: 3 }
+    ];
+
+    async function loadConfig() {
+      try {
+        const res = await fetch('config.json');
+        if (res.ok) {
+          const config = await res.json();
+          if (config.frames && config.frames.length > 0) frames = config.frames;
+        }
+      } catch (e) {
+        console.warn("ใช้ค่ากรอบรูปเริ่มต้นแทนการดึง config.json");
+      }
+    }
+    loadConfig();
+
+    function goToStep(step, isBack = false) {
+      if (isCapturing) stopCapture();
+
+      document.querySelectorAll('[id^="step-"]').forEach(el => el.classList.add('hidden'));
+      const targetEl = document.getElementById(`step-${step}`);
+      if (targetEl) targetEl.classList.remove('hidden');
+
+      if (!isBack && currentStep !== step) {
+        stepHistory.push(step);
+      }
+      currentStep = step;
+
+      const backBtn = document.getElementById('back-button-container');
+      if (step === 1 || step === 1) {
+        backBtn.classList.add('hidden');
+      } else {
+        backBtn.classList.remove('hidden');
+      }
+
+      if (step === 2) renderFrames();
+      if (step === 3) {
+        updateCameraGuide();
+        if (capturedImages.length === 0 || capturedImages.every(img => img === null)) {
+          startCameraAndCapture();
+        } else {
+          showRetakeUI();
+        }
+      }
+      if (step === 4) renderFinalCanvas();
+    }
+
+    function goBack() {
+      if (stepHistory.length > 1) {
+        stepHistory.pop();
+        const prevStep = stepHistory[stepHistory.length - 1];
+        goToStep(prevStep, true);
+      }
+    }
+
+    function stopCapture() {
+      isCapturing = false;
+      if (captureTimer) clearInterval(captureTimer);
+      document.getElementById('countdown').classList.add('hidden');
+    }
+
+    function selectShots(count) {
+      targetShots = count;
+      capturedImages = new Array(count).fill(null);
+      goToStep(2);
+    }
+
+    function renderFrames() {
+      const titleEl = document.getElementById('frame-title');
+      if (titleEl) titleEl.innerText = `เลือกกรอบรูป (${targetShots} ช็อต)`;
+
+      const filteredFrames = frames.filter(f => f.shots === targetShots);
+      const container = document.getElementById('frame-list');
+      if (!container) return;
+
+      if (filteredFrames.length === 0) {
+        container.innerHTML = `<p class="col-span-2 text-stone-400 py-8">ไม่พบกรอบรูปสำหรับ ${targetShots} ช็อต</p>`;
+        return;
+      }
+
+      container.innerHTML = filteredFrames.map(f => `
+        <div onclick="selectFrame('${f.file}')" class="group border border-stone-200 p-3 rounded-xl cursor-pointer hover:border-stone-800 bg-white shadow-sm hover:shadow-md transition flex flex-col items-center space-y-2">
+          <div class="w-full aspect-[8/23] bg-stone-100 rounded-lg overflow-hidden flex items-center justify-center p-1 border border-stone-100 relative">
+            <img src="${f.file}" alt="${f.name}" class="w-full h-full object-contain group-hover:scale-105 transition duration-200 z-10" onerror="this.src='https://via.placeholder.com/150x431?text=No+Preview'">
+          </div>
+          <p class="text-sm font-medium text-stone-700 group-hover:text-stone-900">${f.name}</p>
+        </div>
+      `).join('');
+    }
+
+    function selectFrame(file) {
+      selectedFrame = file;
+      goToStep(3);
+    }
+
+    function updateCameraGuide() {
+      const guideBox = document.getElementById('guide-box');
+      if (!guideBox) return;
+      if (targetShots === 1) {
+        guideBox.className = "w-full aspect-[700/1600] border-2 border-dashed border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.4)] relative flex items-center justify-center";
+      } else {
+        guideBox.className = "w-full aspect-[700/550] border-2 border-dashed border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.4)] relative flex items-center justify-center";
+      }
+    }
+
+    async function startCameraAndCapture() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { width: { ideal: 1920 }, height: { ideal: 1080 } }, 
+          audio: false 
+        });
+        document.getElementById('webcam').srcObject = stream;
+        document.getElementById('retake-controls').classList.add('hidden');
+        document.getElementById('camera-guide').classList.remove('hidden');
+        
+        setTimeout(() => {
+          capturedImages = new Array(targetShots).fill(null);
+          isCapturing = true;
+          captureNext(0);
+        }, 1000);
+      } catch (err) {
+        alert("ไม่สามารถเข้าถึงกล้องได้ กรุณ่อนุญาตสิทธิ์การใช้กล้อง");
+      }
+    }
+
+    function captureNext(index) {
+      if (!isCapturing || index >= targetShots) {
+        showRetakeUI();
+        return;
+      }
+
+      document.getElementById('shot-preview-overlay').classList.add('hidden');
+
+      let count = 3;
+      const cdEl = document.getElementById('countdown');
+      cdEl.classList.remove('hidden');
+      cdEl.innerText = count;
+
+      captureTimer = setInterval(() => {
+        count--;
+        if (count > 0) {
+          cdEl.innerText = count;
+        } else {
+          clearInterval(captureTimer);
+          cdEl.classList.add('hidden');
+          
+          takePhoto(index);
+
+          const previewImg = document.getElementById('shot-preview-overlay');
+          previewImg.src = capturedImages[index];
+          previewImg.classList.remove('hidden');
+
+          setTimeout(() => {
+            if (isCapturing) captureNext(index + 1);
+          }, 3000);
+        }
+      }, 1000);
+    }
+
+    function takePhoto(index) {
+      const video = document.getElementById('webcam');
+      const canvas = document.createElement('canvas');
+      
+      const targetW = 700;
+      const targetH = targetShots === 1 ? 1600 : 550;
+
+      canvas.width = targetW;
+      canvas.height = targetH;
+      
+      const vWidth = video.videoWidth || 1920;
+      const vHeight = video.videoHeight || 1080;
+      
+      const cropWidth = vWidth;
+      const cropHeight = vWidth * (targetH / targetW);
+      
+      const startX = 0;
+      const startY = Math.max(0, (vHeight - cropHeight) / 2);
+      
+      const ctx = canvas.getContext('2d');
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      
+      ctx.drawImage(video, startX, startY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
+      capturedImages[index] = canvas.toDataURL('image/png');
+    }
+
+    function retakeSingleShot(index) {
+      isCapturing = true;
+      document.getElementById('shot-preview-overlay').classList.add('hidden');
+      document.getElementById('retake-controls').classList.add('hidden');
+      document.getElementById('camera-guide').classList.remove('hidden');
+      
+      let count = 3;
+      const cdEl = document.getElementById('countdown');
+      cdEl.classList.remove('hidden');
+      cdEl.innerText = count;
+
+      captureTimer = setInterval(() => {
+        count--;
+        if (count > 0) {
+          cdEl.innerText = count;
+        } else {
+          clearInterval(captureTimer);
+          cdEl.classList.add('hidden');
+          takePhoto(index);
+          
+          const previewImg = document.getElementById('shot-preview-overlay');
+          previewImg.src = capturedImages[index];
+          previewImg.classList.remove('hidden');
+
+          setTimeout(() => {
+            document.getElementById('shot-preview-overlay').classList.add('hidden');
+            showRetakeUI();
+          }, 3000);
+        }
+      }, 1000);
+    }
+
+    function showRetakeUI() {
+      isCapturing = false;
+      document.getElementById('shot-preview-overlay').classList.add('hidden');
+      document.getElementById('camera-guide').classList.add('hidden');
+
+      const previewContainer = document.getElementById('shots-preview');
+      previewContainer.innerHTML = capturedImages.map((img, i) => `
+        <div class="relative cursor-pointer border-2 border-stone-300 hover:border-stone-800 rounded overflow-hidden group" onclick="retakeSingleShot(${i})">
+          <img src="${img}" class="${targetShots === 1 ? 'w-20 h-32' : 'w-20 h-16'} object-cover">
+          <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-90 transition">
+            <span class="text-white text-[11px] font-medium bg-black/60 px-1.5 py-0.5 rounded">ถ่ายใหม่</span>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('retake-controls').classList.remove('hidden');
+    }
+
+    function renderFinalCanvas() {
+      const canvas = document.getElementById('final-canvas');
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = 800;
+      canvas.height = 2300;
+
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      let loadedCount = 0;
+
+      if (targetShots === 1) {
+        if (!capturedImages[0]) return;
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 50, 150, 700, 1600);
+          drawFrameOverlay(canvas, ctx);
+        };
+        img.src = capturedImages[0];
+      } else {
+        capturedImages.forEach((imgSrc, i) => {
+          if (!imgSrc) return;
+          const img = new Image();
+          img.onload = () => {
+            ctx.drawImage(img, 50, 150 + (i * 600), 700, 550);
+            loadedCount++;
+            
+            if (loadedCount === 3) {
+              drawFrameOverlay(canvas, ctx);
+            }
+          };
+          img.src = imgSrc;
+        });
+      }
+    }
+
+    function drawFrameOverlay(canvas, ctx) {
+      if (selectedFrame) {
+        const frameImg = new Image();
+        frameImg.onload = () => {
+          ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+        };
+        frameImg.src = selectedFrame;
+      }
+    }
+  </script>
+</body>
+</html>      </button>
 
       <button onclick="selectShots(3)" class="p-6 border border-stone-200 bg-white rounded-2xl hover:border-stone-800 hover:shadow-md transition flex flex-col items-center space-y-3">
         <div class="w-16 h-20 bg-stone-100 border border-stone-300 rounded flex flex-col justify-between p-1">
