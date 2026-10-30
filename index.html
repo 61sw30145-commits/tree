@@ -1,399 +1,482 @@
-<!DOCTYPE html>
-<html lang="th">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minimal Photo Booth</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @media print {
-      body * { visibility: hidden; }
-      #print-area, #print-area * { visibility: visible; }
-      #print-area { position: absolute; left: 0; top: 0; width: 100%; }
-      #back-button-container { display: none !important; }
-    }
-    #webcam { transform: scaleX(-1); }
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
   </style>
 </head>
-<body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col items-center justify-center p-4 relative">
-
-  <!-- ปุ่มย้อนกลับ -->
-  <div id="back-button-container" class="absolute top-6 left-6 hidden">
-    <button onclick="goBack()" class="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 rounded-full shadow-sm hover:border-stone-800 transition text-sm font-medium text-stone-700">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-      </svg>
-      ย้อนกลับ
-    </button>
-  </div>
-
-  <!-- Step 1: หน้าแรก -->
-  <div id="step-1" class="text-center space-y-6">
-    <h1 class="text-4xl font-light tracking-wide">PHOTO BOOTH</h1>
-    <button onclick="goToStep('shots')" class="px-8 py-3 bg-stone-800 text-white rounded-full hover:bg-stone-700 transition">กดเพื่อเริ่มถ่ายรูป</button>
-  </div>
-
-  <!-- Step Shots: เลือกจำนวนช็อต (1 หรือ 3) -->
-  <div id="step-shots" class="hidden text-center space-y-6 w-full max-w-md">
-    <h2 class="text-2xl font-light">เลือกจำนวนช็อต</h2>
-    <div class="grid grid-cols-2 gap-4">
-      <button onclick="selectShots(1)" class="p-6 border border-stone-200 bg-white rounded-2xl hover:border-stone-800 hover:shadow-md transition flex flex-col items-center space-y-3">
-        <div class="w-16 h-20 bg-stone-100 border border-stone-300 rounded flex items-center justify-center p-1">
-          <div class="w-full h-14 bg-stone-300 rounded-sm"></div>
-        </div>
-        <span class="font-medium text-stone-700">1 ช็อต</span>
-      </button>
-
-      <button onclick="selectShots(3)" class="p-6 border border-stone-200 bg-white rounded-2xl hover:border-stone-800 hover:shadow-md transition flex flex-col items-center space-y-3">
-        <div class="w-16 h-20 bg-stone-100 border border-stone-300 rounded flex flex-col justify-between p-1">
-          <div class="w-full h-4 bg-stone-300 rounded-sm"></div>
-          <div class="w-full h-4 bg-stone-300 rounded-sm"></div>
-          <div class="w-full h-4 bg-stone-300 rounded-sm"></div>
-        </div>
-        <span class="font-medium text-stone-700">3 ช็อต</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Step 2: เลือกกรอบรูป -->
-  <div id="step-2" class="hidden text-center space-y-6 w-full max-w-lg">
-    <h2 id="frame-title" class="text-2xl font-light">เลือกกรอบรูป</h2>
-    <div id="frame-list" class="grid grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto p-2"></div>
-  </div>
-
-  <!-- Step 3: กล้อง & เลือกแก้ไขรูป -->
-  <div id="step-3" class="hidden text-center space-y-4 w-full max-w-md">
-    <div class="relative w-full bg-black rounded-lg overflow-hidden shadow-sm flex items-center justify-center">
-      <video id="webcam" autoplay playsinline class="w-full h-auto object-contain"></video>
-
-      <div id="camera-guide" class="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
-        <div id="guide-box" class="w-full aspect-[700/550] border-2 border-dashed border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.4)] relative flex items-center justify-center">
-          <span class="text-xs text-white/70 bg-black/40 px-2 py-0.5 rounded backdrop-blur-sm absolute top-2">ให้อยู่ในกรอบนี้</span>
-        </div>
-      </div>
-
-      <img id="shot-preview-overlay" class="absolute inset-0 w-full h-full object-contain hidden z-20" />
-      <div id="countdown" class="absolute inset-0 flex items-center justify-center text-6xl font-bold text-white bg-black/40 hidden z-30">3</div>
-    </div>
-    
-    <div id="retake-controls" class="hidden space-y-3">
-      <p class="text-sm font-medium text-stone-700">กดที่รูปเพื่อถ่ายใหม่เฉพาะช็อตนั้น:</p>
-      <div id="shots-preview" class="flex justify-center gap-2 flex-wrap"></div>
-      <button onclick="goToStep(4)" class="px-6 py-2 bg-stone-800 text-white rounded-full">ยืนยันรูปภาพ</button>
-    </div>
-  </div>
-
-  <!-- Step 4: สั่งปริ้นท์ -->
-  <div id="step-4" class="hidden text-center space-y-6 w-full max-w-md">
-    <h2 class="text-2xl font-light">สั่งปริ้นท์รูปภาพ</h2>
-    
-    <div id="print-area" class="flex justify-center">
-      <canvas id="final-canvas" class="max-w-full rounded shadow-md"></canvas>
-    </div>
-
-    <div class="flex items-center justify-center gap-4">
-      <button onclick="window.print()" class="px-6 py-2 bg-stone-800 text-white rounded-full">สั่งปริ้นท์</button>
-      <button onclick="goToStep(3)" class="px-6 py-2 border border-stone-800 rounded-full">แก้ไขรูปภาพ</button>
-    </div>
-  </div>
-
-  <script>
-    let currentStep = 1;
-    let stepHistory = [1];
-    let selectedFrame = null;
-    let targetShots = 3;
-    let capturedImages = [];
-    let captureTimer = null;
-    let isCapturing = false;
-
-    let frames = [
-      { id: 1, name: "1 ช็อต - กรอบใหญ่ 1", file: "frame_1shot_1.png", shots: 1 },
-      { id: 2, name: "1 ช็อต - กรอบใหญ่ 2", file: "frame_1shot_2.png", shots: 1 },
-      { id: 3, name: "บัวหลวงใหญ่", file: "frame1.png", shots: 3 },
-      { id: 4, name: "กรอบสีดำ", file: "frame2.png", shots: 3 },
-      { id: 5, name: "กรอบสีฟ้า", file: "frame3.png", shots: 3 },
-      { id: 6, name: "ใบเสร็จ", file: "frame4.png", shots: 3 }
-    ];
-
-    async function loadConfig() {
-      try {
-        const res = await fetch('config.json');
-        if (res.ok) {
-          const config = await res.json();
-          if (config.frames && config.frames.length > 0) frames = config.frames;
-        }
-      } catch (e) {
-        console.warn("ใช้ค่ากรอบรูปเริ่มต้นแทนการดึง config.json");
-      }
-    }
-    loadConfig();
-
-    function goToStep(step, isBack = false) {
-      if (isCapturing) stopCapture();
-
-      document.querySelectorAll('[id^="step-"]').forEach(el => el.classList.add('hidden'));
-      const targetEl = document.getElementById(`step-${step}`);
-      if (targetEl) targetEl.classList.remove('hidden');
-
-      if (!isBack && currentStep !== step) {
-        stepHistory.push(step);
-      }
-      currentStep = step;
-
-      const backBtn = document.getElementById('back-button-container');
-      if (step === 1 || step === '1') {
-        backBtn.classList.add('hidden');
-      } else {
-        backBtn.classList.remove('hidden');
-      }
-
-      if (step === 2) renderFrames();
-      if (step === 3) {
-        updateCameraGuide();
-        if (capturedImages.length === 0 || capturedImages.every(img => img === null)) {
-          startCameraAndCapture();
-        } else {
-          showRetakeUI();
-        }
-      }
-      if (step === 4) renderFinalCanvas();
-    }
-
-    function goBack() {
-      if (stepHistory.length > 1) {
-        stepHistory.pop();
-        const prevStep = stepHistory[stepHistory.length - 1];
-        goToStep(prevStep, true);
-      }
-    }
-
-    function stopCapture() {
-      isCapturing = false;
-      if (captureTimer) clearInterval(captureTimer);
-      document.getElementById('countdown').classList.add('hidden');
-    }
-
-    function selectShots(count) {
-      targetShots = count;
-      capturedImages = new Array(count).fill(null);
-      goToStep(2);
-    }
-
-    function renderFrames() {
-      const titleEl = document.getElementById('frame-title');
-      if (titleEl) titleEl.innerText = `เลือกกรอบรูป (${targetShots} ช็อต)`;
-
-      const filteredFrames = frames.filter(f => f.shots === targetShots);
-      const container = document.getElementById('frame-list');
-      if (!container) return;
-
-      if (filteredFrames.length === 0) {
-        container.innerHTML = `<p class="col-span-2 text-stone-400 py-8">ไม่พบกรอบรูปสำหรับ ${targetShots} ช็อต</p>`;
-        return;
-      }
-
-      container.innerHTML = filteredFrames.map(f => `
-        <div onclick="selectFrame('${f.file}')" class="group border border-stone-200 p-3 rounded-xl cursor-pointer hover:border-stone-800 bg-white shadow-sm hover:shadow-md transition flex flex-col items-center space-y-2">
-          <div class="w-full aspect-[8/23] bg-stone-100 rounded-lg overflow-hidden flex items-center justify-center p-1 border border-stone-100 relative">
-            <img src="${f.file}" alt="${f.name}" class="w-full h-full object-contain group-hover:scale-105 transition duration-200 z-10" onerror="this.src='https://via.placeholder.com/150x431?text=No+Preview'">
-          </div>
-          <p class="text-sm font-medium text-stone-700 group-hover:text-stone-900">${f.name}</p>
-        </div>
-      `).join('');
-    }
-
-    function selectFrame(file) {
-      selectedFrame = file;
-      goToStep(3);
-    }
-
-    function updateCameraGuide() {
-      const guideBox = document.getElementById('guide-box');
-      if (!guideBox) return;
-      if (targetShots === 1) {
-        guideBox.className = "w-full aspect-[700/1600] border-2 border-dashed border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.4)] relative flex items-center justify-center";
-      } else {
-        guideBox.className = "w-full aspect-[700/550] border-2 border-dashed border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.4)] relative flex items-center justify-center";
-      }
-    }
-
-    async function startCameraAndCapture() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { width: { ideal: 1920 }, height: { ideal: 1080 } }, 
-          audio: false 
-        });
-        document.getElementById('webcam').srcObject = stream;
-        document.getElementById('retake-controls').classList.add('hidden');
-        document.getElementById('camera-guide').classList.remove('hidden');
-        
-        setTimeout(() => {
-          capturedImages = new Array(targetShots).fill(null);
-          isCapturing = true;
-          captureNext(0);
-        }, 1000);
-      } catch (err) {
-        alert("ไม่สามารถเข้าถึงกล้องได้ กรุณ่อนุญาตสิทธิ์การใช้กล้อง");
-      }
-    }
-
-    function captureNext(index) {
-      if (!isCapturing || index >= targetShots) {
-        showRetakeUI();
-        return;
-      }
-
-      document.getElementById('shot-preview-overlay').classList.add('hidden');
-
-      let count = 3;
-      const cdEl = document.getElementById('countdown');
-      cdEl.classList.remove('hidden');
-      cdEl.innerText = count;
-
-      captureTimer = setInterval(() => {
-        count--;
-        if (count > 0) {
-          cdEl.innerText = count;
-        } else {
-          clearInterval(captureTimer);
-          cdEl.classList.add('hidden');
-          
-          takePhoto(index);
-
-          const previewImg = document.getElementById('shot-preview-overlay');
-          previewImg.src = capturedImages[index];
-          previewImg.classList.remove('hidden');
-
-          setTimeout(() => {
-            if (isCapturing) captureNext(index + 1);
-          }, 3000);
-        }
-      }, 1000);
-    }
-
-    function takePhoto(index) {
-      const video = document.getElementById('webcam');
-      const canvas = document.createElement('canvas');
-      
-      const targetW = 700;
-      const targetH = targetShots === 1 ? 1600 : 550;
-
-      canvas.width = targetW;
-      canvas.height = targetH;
-      
-      const vWidth = video.videoWidth || 1920;
-      const vHeight = video.videoHeight || 1080;
-      
-      const cropWidth = vWidth;
-      const cropHeight = vWidth * (targetH / targetW);
-      
-      const startX = 0;
-      const startY = Math.max(0, (vHeight - cropHeight) / 2);
-      
-      const ctx = canvas.getContext('2d');
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
-      
-      ctx.drawImage(video, startX, startY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
-      capturedImages[index] = canvas.toDataURL('image/png');
-    }
-
-    function retakeSingleShot(index) {
-      isCapturing = true;
-      document.getElementById('shot-preview-overlay').classList.add('hidden');
-      document.getElementById('retake-controls').classList.add('hidden');
-      document.getElementById('camera-guide').classList.remove('hidden');
-      
-      let count = 3;
-      const cdEl = document.getElementById('countdown');
-      cdEl.classList.remove('hidden');
-      cdEl.innerText = count;
-
-      captureTimer = setInterval(() => {
-        count--;
-        if (count > 0) {
-          cdEl.innerText = count;
-        } else {
-          clearInterval(captureTimer);
-          cdEl.classList.add('hidden');
-          takePhoto(index);
-          
-          const previewImg = document.getElementById('shot-preview-overlay');
-          previewImg.src = capturedImages[index];
-          previewImg.classList.remove('hidden');
-
-          setTimeout(() => {
-            document.getElementById('shot-preview-overlay').classList.add('hidden');
-            showRetakeUI();
-          }, 3000);
-        }
-      }, 1000);
-    }
-
-    function showRetakeUI() {
-      isCapturing = false;
-      document.getElementById('shot-preview-overlay').classList.add('hidden');
-      document.getElementById('camera-guide').classList.add('hidden');
-
-      const previewContainer = document.getElementById('shots-preview');
-      previewContainer.innerHTML = capturedImages.map((img, i) => `
-        <div class="relative cursor-pointer border-2 border-stone-300 hover:border-stone-800 rounded overflow-hidden group" onclick="retakeSingleShot(${i})">
-          <img src="${img}" class="${targetShots === 1 ? 'w-20 h-32' : 'w-20 h-16'} object-cover">
-          <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-90 transition">
-            <span class="text-white text-[11px] font-medium bg-black/60 px-1.5 py-0.5 rounded">ถ่ายใหม่</span>
-          </div>
-        </div>
-      `).join('');
-
-      document.getElementById('retake-controls').classList.remove('hidden');
-    }
-
-    function renderFinalCanvas() {
-      const canvas = document.getElementById('final-canvas');
-      const ctx = canvas.getContext('2d');
-
-      canvas.width = 800;
-      canvas.height = 2300;
-
-      ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      let loadedCount = 0;
-
-      if (targetShots === 1) {
-        if (!capturedImages[0]) return;
-        const img = new Image();
-        img.onload = () => {
-          ctx.drawImage(img, 50, 150, 700, 1600);
-          drawFrameOverlay(canvas, ctx);
-        };
-        img.src = capturedImages[0];
-      } else {
-        capturedImages.forEach((imgSrc, i) => {
-          if (!imgSrc) return;
-          const img = new Image();
-          img.onload = () => {
-            ctx.drawImage(img, 50, 150 + (i * 600), 700, 550);
-            loadedCount++;
-            
-            if (loadedCount === 3) {
-              drawFrameOverlay(canvas, ctx);
-            }
-          };
-          img.src = imgSrc;
-        });
-      }
-    }
-
-    function drawFrameOverlay(canvas, ctx) {
-      if (selectedFrame) {
-        const frameImg = new Image();
-        frameImg.onload = () => {
-          ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-        };
-        frameImg.src = selectedFrame;
-      }
-    }
-  </script>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="th"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Minimal Photo Booth (2 Shots - POS Ready)&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;style id="dynamic-print-style"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* -------------------------------------------------- */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* ตั้งค่าสำหรับการพิมพ์สลิป (Thermal Printer) */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* -------------------------------------------------- */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>@media print {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>@page {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>size: 70mm 210mm;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>margin: 0 !important;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>padding: 0 !important;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>background: #fff !important;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>/* ซ่อนองค์ประกอบหน้าจอทั้งหมด */</p>
+<p class="p1"><span class="Apple-converted-space">      </span>body * {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>visibility: hidden !important;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>/* แสดงเฉพาะพื้นที่รูปที่จะพิมพ์ */</p>
+<p class="p1"><span class="Apple-converted-space">      </span>#print-area, #print-area *, #print-image-tag {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>visibility: visible !important;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>#print-area {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>left: 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>top: 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>width: 70mm !important;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>height: auto;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>display: block !important;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>#print-image-tag {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>width: 100% !important;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>height: auto !important;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>display: block !important;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>object-fit: contain;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>#back-button-container, .bg-white, #final-canvas, .no-print {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>display: none !important;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>#webcam { transform: scaleX(-1); }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* มาร์กมุม 4 มุมสำหรับกรอบถ่ายรูป */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.corner-mark {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>width: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>height: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-color: #ffffff;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-style: solid;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>pointer-events: none;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.top-left { top: -2px; left: -2px; border-width: 3px 0 0 3px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.top-right { top: -2px; right: -2px; border-width: 3px 3px 0 0; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.bottom-left { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.bottom-right { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col items-center justify-center p-4 relative"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- ปุ่มย้อนกลับ --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="back-button-container" class="absolute top-6 left-6 hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button onclick="goBack()" class="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 rounded-full shadow-sm hover:border-stone-800 transition text-sm font-medium text-stone-700"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>ย้อนกลับ</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Step 1: หน้าแรก --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="step-1" class="text-center space-y-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;h1 class="text-4xl font-light tracking-wide"&gt;PHOTO BOOTH POS&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button onclick="goToStep(15)" class="px-8 py-3 bg-stone-800 text-white rounded-full hover:bg-stone-700 transition shadow-md"&gt;กดเพื่อเริ่มถ่ายรูป&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Step 1.5: เลือกจำนวนช็อต (2 ช็อต) --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="step-15" class="hidden text-center space-y-6 w-full max-w-md"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2 class="text-2xl font-light"&gt;เลือกจำนวนช็อต&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="flex justify-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button onclick="selectShotCount(2)" class="p-6 bg-white border border-stone-200 rounded-2xl shadow-sm hover:border-stone-800 transition flex flex-col items-center gap-2 group w-64"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;span class="text-3xl font-light group-hover:scale-110 transition"&gt;2&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;span class="text-sm font-medium text-stone-600"&gt;ถ่าย 2 ช็อต (70x210 mm)&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Step 2: เลือกกรอบรูป --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="step-2" class="hidden text-center space-y-6 w-full max-w-lg"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2 class="text-2xl font-light"&gt;เลือกกรอบรูป&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="frame-list" class="grid grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto p-2"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Step 3: กล้อง &amp; กำหนดพื้นที่รูปภาพ --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="step-3" class="hidden text-center space-y-4 w-full max-w-md"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="webcam-container" class="relative w-full bg-black rounded-lg overflow-hidden shadow-sm flex items-center justify-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;video id="webcam" autoplay playsinline class="w-full h-auto object-contain"&gt;&lt;/video&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;!-- กรอบไกด์กำหนดตำแหน่งรูปถ่าย --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="camera-guide" class="absolute inset-0 pointer-events-none flex items-center justify-center z-10"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="guide-box" class="w-[85%] aspect-[65/50] border-2 border-white/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] relative flex items-center justify-center transition-all duration-300 rounded-md"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="corner-mark top-left"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="corner-mark top-right"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="corner-mark bottom-left"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="corner-mark bottom-right"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="countdown" class="absolute inset-0 flex items-center justify-center text-6xl font-bold text-white bg-black/40 hidden z-30"&gt;3&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- แผงควบคุมและแสดงพรีวิวภาพสำเร็จใส่กรอบ --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="retake-controls" class="hidden space-y-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="flex flex-col items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p class="text-xs text-stone-500 mb-2"&gt;แตะที่บริเวณภาพช็อตที่ต้องการถ่ายใหม่&lt;/p&gt;</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- แสดงรูปแถบสำเร็จแบบใส่กรอบ --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="relative w-full max-w-[220px] shadow-lg rounded-lg overflow-hidden border border-stone-200 bg-white"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;canvas id="preview-framed-canvas" class="w-full h-auto block"&gt;&lt;/canvas&gt;</p>
+<p class="p2"><span class="Apple-converted-space">          </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;!-- เลเยอร์คลิกเลือกช็อตถ่ายใหม่ --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div id="shot-click-overlays" class="absolute inset-0 pointer-events-auto"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- ช็อตที่ 1 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div onclick="retakeSingleShot(0)"<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                 </span>class="absolute left-[3.57%] w-[92.86%] top-[30.95%] h-[23.81%] cursor-pointer hover:bg-black/20 transition rounded flex items-center justify-center group border border-transparent hover:border-white/60"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span class="opacity-0 group-hover:opacity-100 bg-stone-900/80 text-white text-[11px] px-2.5 py-1 rounded-full shadow"&gt;ถ่ายใหม่ (ช็อต 1)&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- ช็อตที่ 2 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div onclick="retakeSingleShot(1)"<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                 </span>class="absolute left-[3.57%] w-[92.86%] top-[57.19%] h-[23.81%] cursor-pointer hover:bg-black/20 transition rounded flex items-center justify-center group border border-transparent hover:border-white/60"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span class="opacity-0 group-hover:opacity-100 bg-stone-900/80 text-white text-[11px] px-2.5 py-1 rounded-full shadow"&gt;ถ่ายใหม่ (ช็อต 2)&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="flex gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onclick="goToStep(4)" class="flex-1 py-2.5 bg-stone-800 text-white rounded-full hover:bg-stone-700 transition font-medium shadow-sm"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>ไปหน้าพิมพ์รูป</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onclick="triggerDirectPrint()" class="flex-1 py-2.5 bg-emerald-600 text-white rounded-full hover:bg-emerald-500 transition font-medium shadow-sm flex items-center justify-center gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"&gt;&lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/&gt;&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>พิมพ์ด่วนทันที</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Step 4: สั่งพิมพ์ --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="step-4" class="hidden text-center space-y-6 w-full max-w-md"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2 class="text-2xl font-light"&gt;พิมพ์รูปภาพ / บันทึกไฟล์&lt;/h2&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="print-area" class="flex justify-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;canvas id="final-canvas" class="max-w-full rounded shadow-md border border-stone-200"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;img id="print-image-tag" class="hidden" alt="Print Render"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- แผงตั้งค่าการพิมพ์ --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="bg-white p-4 rounded-xl border border-stone-200 space-y-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="flex flex-col gap-2 pt-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onclick="triggerPrint()" class="w-full py-3 bg-stone-800 text-white rounded-xl hover:bg-stone-700 transition font-medium flex items-center justify-center gap-2 text-base shadow-sm"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>พิมพ์ภาพ (Print)</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onclick="downloadImage()" class="w-full py-2.5 bg-white text-stone-800 border border-stone-300 hover:bg-stone-50 rounded-xl transition font-medium text-sm flex items-center justify-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>บันทึกรูปภาพ / AirDrop</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button onclick="goToStep(3)" class="text-sm text-stone-500 hover:text-stone-800 underline"&gt;แก้ไข/ถ่ายใหม่&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let currentStep = 1;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let stepHistory = [1];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let selectedFrame = null;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let targetShotCount = 2;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let capturedImages = [];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let frames = [];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let captureTimer = null;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let isCapturing = false;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let mediaStream = null;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>async function loadConfig() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const res = await fetch('config.json');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const config = await res.json();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>frames = config.frames || [];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>frames = [</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{ id: 1, name: "ความรักมันออกแบบไม่ได้", file: "4.png", shots: 2 },</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{ id: 2, name: "ข่าวสังคมเขาชมไม่สร่าง", file: "5.png", shots: 2 },</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{ id: 3, name: "ไอเลิฟมช", file: "7.png", shots: 2 },</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{ id: 4, name: "ไอเลิฟสังคม", file: "6.png", shots: 2 },</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{ id: 5, name: "ไอเลิฟสังวิท", file: "8.png", shots: 2 },</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{ id: 6, name: "ไอเลิฟอาเซียน", file: "9.png", shots: 2 },</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{ id: 7, name: "ไอเลิฟจีออ", file: "10.png", shots: 2 },</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{ id: 8, name: "ไอเลิฟซ้อคเฟส", file: "11.png", shots: 2 },</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{ id: 9, name: "มช.ดิวะ", file: "13.png", shots: 2 },</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{ id: 10, name: "สังคมดิวะ", file: "12.png", shots: 2 },</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{ id: 11, name: "คิดถึงเสมอ", file: "14.png", shots: 2 },</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{ id: 12, name: "เค้ารักตี๋", file: "15.png", shots: 2 },</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{ id: 13, name: "เค้ารักพี่คนสวย", file: "16.png", shots: 2 }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>loadConfig();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function selectShotCount(count) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>targetShotCount = count;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>capturedImages = new Array(count).fill(null);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>goToStep(2);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function goToStep(step, isBack = false) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (isCapturing) stopCapture();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (currentStep === 3 &amp;&amp; step !== 3) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stopCamera();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.querySelectorAll('[id^="step-"]').forEach(el =&gt; el.classList.add('hidden'));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById(`step-${step}`).classList.remove('hidden');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!isBack &amp;&amp; currentStep !== step) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stepHistory.push(step);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>currentStep = step;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const backBtn = document.getElementById('back-button-container');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (step === 1) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>backBtn.classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>backBtn.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (step === 2) renderFrames();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (step === 3) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (!capturedImages[0]) {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>startCameraAndCapture();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>showRetakeUI();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (step === 4) renderFinalCanvas(false);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function goBack() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (stepHistory.length &gt; 1) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stepHistory.pop();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const prevStep = stepHistory[stepHistory.length - 1];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>goToStep(prevStep, true);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function stopCapture() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>isCapturing = false;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (captureTimer) clearInterval(captureTimer);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('countdown').classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function stopCamera() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (mediaStream) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>mediaStream.getTracks().forEach(track =&gt; track.stop());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>mediaStream = null;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function renderFrames() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const container = document.getElementById('frame-list');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const filteredFrames = frames.filter(f =&gt; f.shots === targetShotCount);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (filteredFrames.length === 0) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>container.innerHTML = `&lt;p class="col-span-2 text-stone-500 py-8"&gt;ไม่พบกรอบรูปสำหรับ ${targetShotCount} ช็อต&lt;/p&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>container.innerHTML = filteredFrames.map(f =&gt; `</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div onclick="selectFrame('${f.file}')" class="group border border-stone-200 p-3 rounded-xl cursor-pointer hover:border-stone-800 bg-white shadow-sm hover:shadow-md transition flex flex-col items-center space-y-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="w-full aspect-[70/210] bg-stone-100 rounded-lg overflow-hidden flex items-center justify-center p-1 border border-stone-100 relative"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;img src="${f.file}" alt="${f.name}" class="w-full h-full object-contain group-hover:scale-105 transition duration-200 z-10" onerror="this.src='https://via.placeholder.com/150?text=No+Preview'"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p class="text-sm font-medium text-stone-700 group-hover:text-stone-900"&gt;${f.name}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>`).join('');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function selectFrame(file) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>selectedFrame = file;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>goToStep(3);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>async function startCameraAndCapture() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (!mediaStream) {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mediaStream = await navigator.mediaDevices.getUserMedia({<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>video: { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: "user" },<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>audio: false<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>});</p>
+<p class="p1"><span class="Apple-converted-space">          </span>document.getElementById('webcam').srcObject = mediaStream;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>document.getElementById('webcam-container').classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>document.getElementById('retake-controls').classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>document.getElementById('camera-guide').classList.remove('hidden');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>setTimeout(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>capturedImages = new Array(targetShotCount).fill(null);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>isCapturing = true;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>captureNext(0);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}, 1000);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} catch (err) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>alert("ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตสิทธิ์การใช้กล้อง");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function captureNext(index) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!isCapturing || index &gt;= targetShotCount) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>showRetakeUI();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let count = 3;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const cdEl = document.getElementById('countdown');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>cdEl.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>cdEl.innerText = count;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>captureTimer = setInterval(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>count--;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (count &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>cdEl.innerText = count;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>clearInterval(captureTimer);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>cdEl.classList.add('hidden');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>takePhoto(index);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>setTimeout(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (isCapturing) captureNext(index + 1);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>}, 1000);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}, 1000);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function takePhoto(index) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const video = document.getElementById('webcam');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const canvas = document.createElement('canvas');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const vWidth = video.videoWidth;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const vHeight = video.videoHeight;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>canvas.width = 975;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>canvas.height = 750;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const targetRatio = 975 / 750;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const videoRatio = vWidth / vHeight;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let cropWidth, cropHeight, startX, startY;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (videoRatio &gt; targetRatio) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>cropHeight = vHeight;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>cropWidth = vHeight * targetRatio;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>startX = (vWidth - cropWidth) / 2;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>startY = 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>cropWidth = vWidth;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>cropHeight = vWidth / targetRatio;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>startX = 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>startY = (vHeight - cropHeight) / 2;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const ctx = canvas.getContext('2d');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>ctx.translate(canvas.width, 0);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>ctx.scale(-1, 1);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>ctx.drawImage(video, startX, startY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>capturedImages[index] = canvas.toDataURL('image/png');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function retakeSingleShot(index) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>isCapturing = true;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('webcam-container').classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('retake-controls').classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('camera-guide').classList.remove('hidden');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let count = 3;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const cdEl = document.getElementById('countdown');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>cdEl.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>cdEl.innerText = count;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>captureTimer = setInterval(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>count--;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (count &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>cdEl.innerText = count;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>clearInterval(captureTimer);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>cdEl.classList.add('hidden');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>takePhoto(index);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>showRetakeUI();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}, 1000);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>async function showRetakeUI() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>isCapturing = false;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('camera-guide').classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('webcam-container').classList.add('hidden');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const previewCanvas = document.getElementById('preview-framed-canvas');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const ctx = previewCanvas.getContext('2d');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>previewCanvas.width = 1050;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>previewCanvas.height = 3150;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>ctx.fillStyle = "#FFFFFF";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const rawImages = await Promise.all(capturedImages.map(imgSrc =&gt; loadImage(imgSrc)));</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const frameWidth = 975;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const frameHeight = 750;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const marginX = 37.5;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const topYs = [975, 1801.5];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>rawImages.forEach((img, i) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (img) {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>ctx.drawImage(img, marginX, topYs[i], frameWidth, frameHeight);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (selectedFrame) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const frameImg = await loadImage(selectedFrame);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (frameImg) ctx.drawImage(frameImg, 0, 0, previewCanvas.width, previewCanvas.height);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('retake-controls').classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function loadImage(src) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return new Promise((resolve, reject) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (!src) return resolve(null);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const img = new Image();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>img.onload = () =&gt; resolve(img);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>img.onerror = reject;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>img.src = src;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function createDitheredImage(imgElement, scale = 1.0, contrast = 1.35) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const canvas</p>
 </body>
 </html>
