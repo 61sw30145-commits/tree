@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>บันทึกรายรับรายจ่าย - JayFinance</title>
+  <title>บันทึกรายรับรายจ่าย - รายรับรายจ่ายจ้า</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -45,7 +45,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
         <div class="flex items-center justify-between text-slate-500 mb-2">
-          <span class="text-sm font-medium" id="labelTotalIncome">รายรับรวม (ทุกเดือน)</span>
+          <span class="text-sm font-medium" id="labelTotalIncome">รายรับรวม</span>
           <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
             <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
           </div>
@@ -55,7 +55,7 @@
 
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
         <div class="flex items-center justify-between text-slate-500 mb-2">
-          <span class="text-sm font-medium" id="labelTotalExpense">รายจ่ายรวม (ทุกเดือน)</span>
+          <span class="text-sm font-medium" id="labelTotalExpense">รายจ่ายรวม</span>
           <div class="w-8 h-8 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center">
             <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
           </div>
@@ -65,7 +65,7 @@
 
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
         <div class="flex items-center justify-between text-slate-500 mb-2">
-          <span class="text-sm font-medium" id="labelNetBalance">คงเหลือสุทธิ (ทุกเดือน)</span>
+          <span class="text-sm font-medium" id="labelNetBalance">คงเหลือสุทธิ</span>
           <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center">
             <i data-lucide="scale" class="w-4 h-4"></i>
           </div>
@@ -136,22 +136,29 @@
       </form>
     </div>
 
-    <!-- รายการย้อนหลัง & ตัวกรอง -->
+    <!-- รายการย้อนหลัง & ตัวกรองแบบคลิกเลือกเดือน -->
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-      <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h2 class="text-base font-semibold text-slate-900 flex items-center gap-2">
           <i data-lucide="list" class="w-5 h-5 text-slate-500"></i>
           รายการย้อนหลัง
         </h2>
 
-        <!-- ตัวกรองรายเดือนและค้นหา -->
+        <!-- แผงคลิกเลือกเดือนแบบมินิมอล -->
         <div class="flex flex-wrap items-center gap-2">
-          <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1">
-            <span class="text-xs text-slate-500">เดือน:</span>
-            <input type="month" id="monthFilter" onchange="renderTransactions()" class="bg-transparent text-xs text-slate-700 focus:outline-none">
-            <button onclick="clearMonthFilter()" title="แสดงทุกเดือน" class="text-slate-400 hover:text-slate-700 text-xs px-1">✕</button>
+          <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1">
+            <button onclick="changeMonth(-1)" class="p-1.5 text-slate-600 hover:bg-white rounded-lg transition-colors" title="เดือนก่อนหน้า">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <span id="currentMonthDisplay" class="px-3 text-xs font-semibold text-slate-700 min-w-[130px] text-center">กำลังโหลด...</span>
+            <button onclick="changeMonth(1)" class="p-1.5 text-slate-600 hover:bg-white rounded-lg transition-colors" title="เดือนถัดไป">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
           </div>
-          <input type="text" id="searchInput" oninput="renderTransactions()" placeholder="ค้นหาข้อความ/หมวดหมู่..." class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 focus:outline-none w-36 sm:w-44">
+          <button onclick="toggleShowAllMonths()" id="showAllBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium px-3 py-2 rounded-xl transition-colors">
+            ดูทั้งหมด
+          </button>
+          <input type="text" id="searchInput" oninput="renderTransactions()" placeholder="ค้นหาข้อความ/หมวดหมู่..." class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none w-36 sm:w-44">
         </div>
       </div>
 
@@ -187,7 +194,7 @@
       <div class="flex justify-between items-center">
         <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
           <i data-lucide="refresh-cw" class="w-5 h-5 text-slate-600"></i>
-          ตั้งค่าการซิงค์ข้อมูล
+          ตั้งค่าการซิงค์ข้อมูล - รายรับรายจ่ายจ้า
         </h3>
         <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -241,25 +248,22 @@
     // สถานะแอป
     let transactions = JSON.parse(localStorage.getItem('flow_transactions')) || [];
     let webAppUrl = FIXED_SHEET_URL;
+    
+    // ตัวแปรควบคุมการเลือกเดือน (รูปแบบ YYYY-MM หรือ 'ALL' สำหรับดูทั้งหมด)
+    let selectedYearMonth = new Date().toISOString().slice(0, 7);
+    let isViewingAll = false;
 
     // เริ่มต้นระบบ
     document.addEventListener('DOMContentLoaded', () => {
-      const today = new Date();
-      const currentYearMonth = today.toISOString().split('T')[0].slice(0, 7);
-
-      // ตั้งค่าวันที่ปัจจุบันในฟอร์มเพิ่มรายการ
-      document.getElementById('date').value = today.toISOString().split('T')[0];
-      
-      // ตั้งค่าเริ่มต้นช่องกรองเดือนเป็นเดือนปัจจุบัน
-      document.getElementById('monthFilter').value = currentYearMonth;
+      document.getElementById('date').value = new Date().toISOString().split('T')[0];
       document.getElementById('sheetUrlInput').value = webAppUrl;
 
       updateCategories();
+      updateMonthDisplay();
       renderTransactions();
       renderNoteSuggestions();
       lucide.createIcons();
 
-      // ดึงข้อมูลล่าสุดจาก Sheets มาอัปเดตอัตโนมัติเมื่อเปิดหน้า
       if (webAppUrl) {
         syncFromSheets(true);
       }
@@ -290,7 +294,6 @@
       transactions.unshift(newTransaction);
       saveLocalAndSync();
 
-      // เคลียร์ฟอร์ม
       document.getElementById('amount').value = '';
       document.getElementById('note').value = '';
     }
@@ -314,36 +317,73 @@
       }
     }
 
-    // ล้างตัวกรองเดือนเพื่อให้แสดงทุกเดือน
-    function clearMonthFilter() {
-      document.getElementById('monthFilter').value = '';
+    // ฟังก์ชันเลื่อนเปลี่ยนเดือน (คลิกปุ่มลูกศรซ้าย/ขวา)
+    function changeMonth(direction) {
+      isViewingAll = false;
+      let [year, month] = selectedYearMonth.split('-').map(Number);
+      month += direction;
+      
+      if (month > 12) {
+        month = 1;
+        year++;
+      } else if (month < 1) {
+        month = 12;
+        year--;
+      }
+
+      selectedYearMonth = `${year}-${String(month).padStart(2, '0')}`;
+      updateMonthDisplay();
       renderTransactions();
     }
 
-    // แสดงผลรายการและคำนวณสรุปยอด (แยกตามเดือนที่เลือก)
+    // สลับโหมด ดูทั้งหมด / ดูรายเดือน
+    function toggleShowAllMonths() {
+      isViewingAll = !isViewingAll;
+      const btn = document.getElementById('showAllBtn');
+      if (isViewingAll) {
+        btn.className = "bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl transition-colors";
+        document.getElementById('currentMonthDisplay').textContent = "แสดงทุกเดือน";
+      } else {
+        btn.className = "bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium px-3 py-2 rounded-xl transition-colors";
+        updateMonthDisplay();
+      }
+      renderTransactions();
+    }
+
+    // แสดงชื่อเดือนภาษาไทยบนปุ่ม
+    function updateMonthDisplay() {
+      if (isViewingAll) return;
+      const [year, month] = selectedYearMonth.split('-').map(Number);
+      const d = new Date(year, month - 1, 1);
+      const monthName = d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+      document.getElementById('currentMonthDisplay').textContent = monthName;
+      document.getElementById('showAllBtn').className = "bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium px-3 py-2 rounded-xl transition-colors";
+    }
+
+    // แสดงผลรายการและคำนวณสรุปยอด
     function renderTransactions() {
       const listEl = document.getElementById('transactionList');
       const emptyEl = document.getElementById('emptyState');
-      const monthFilter = document.getElementById('monthFilter').value;
       const searchQuery = document.getElementById('searchInput').value.toLowerCase();
 
-      // 1. กรองเฉพาะรายการที่ตรงกับเดือนที่เลือก (สำหรับการ์ดสรุปยอดด้านบน)
-      let monthFiltered = transactions;
-      if (monthFilter) {
-        monthFiltered = monthFiltered.filter(t => t.date.startsWith(monthFilter));
-        document.getElementById('labelTotalIncome').textContent = `รายรับรวม (${formatThaiMonthYear(monthFilter)})`;
-        document.getElementById('labelTotalExpense').textContent = `รายจ่ายรวม (${formatThaiMonthYear(monthFilter)})`;
-        document.getElementById('labelNetBalance').textContent = `คงเหลือสุทธิ (${formatThaiMonthYear(monthFilter)})`;
+      // 1. กรองข้อมูลตามเดือนที่เลือก (หรือแสดงทั้งหมด)
+      let filtered = transactions;
+      if (!isViewingAll) {
+        filtered = filtered.filter(t => t.date.startsWith(selectedYearMonth));
+        const monthStr = document.getElementById('currentMonthDisplay').textContent;
+        document.getElementById('labelTotalIncome').textContent = `รายรับรวม (${monthStr})`;
+        document.getElementById('labelTotalExpense').textContent = `รายจ่ายรวม (${monthStr})`;
+        document.getElementById('labelNetBalance').textContent = `คงเหลือสุทธิ (${monthStr})`;
       } else {
         document.getElementById('labelTotalIncome').textContent = `รายรับรวม (ทุกเดือน)`;
         document.getElementById('labelTotalExpense').textContent = `รายจ่ายรวม (ทุกเดือน)`;
         document.getElementById('labelNetBalance').textContent = `คงเหลือสุทธิ (ทุกเดือน)`;
       }
 
-      // คำนวณยอดรวมจากเดือนที่กรอง
+      // คำนวณยอดเงินรวม
       let income = 0;
       let expense = 0;
-      monthFiltered.forEach(t => {
+      filtered.forEach(t => {
         if (t.type === 'income') income += t.amount;
         else expense += t.amount;
       });
@@ -356,8 +396,8 @@
       netEl.textContent = `฿${net.toLocaleString('th-TH', {minimumFractionDigits: 2})}`;
       netEl.className = `text-2xl font-bold ${net < 0 ? 'text-rose-600' : 'text-slate-900'}`;
 
-      // 2. กรองเพิ่มด้วยช่องค้นหา (สำหรับตารางรายการด้านล่าง)
-      let displayList = monthFiltered;
+      // 2. กรองเพิ่มเติมด้วยช่องค้นหา
+      let displayList = filtered;
       if (searchQuery) {
         displayList = displayList.filter(t => 
           (t.note && t.note.toLowerCase().includes(searchQuery)) ||
@@ -365,7 +405,7 @@
         );
       }
 
-      // แสดงผลตาราง
+      // แสดงตาราง
       if (displayList.length === 0) {
         listEl.innerHTML = '';
         emptyEl.classList.remove('hidden');
@@ -425,13 +465,6 @@
       if (!dateStr) return '';
       const d = new Date(dateStr);
       return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
-    }
-
-    function formatThaiMonthYear(yearMonthStr) {
-      if (!yearMonthStr) return '';
-      const [year, month] = yearMonthStr.split('-');
-      const d = new Date(year, month - 1, 1);
-      return d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
     }
 
     // --- ระบบซิงค์ Google Sheets ---
@@ -494,7 +527,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(transactions, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `flow_finance_backup_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `rayrab_rayjay_backup_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
