@@ -383,7 +383,10 @@
         document.getElementById('lockScreen').classList.remove('hidden');
       }
 
-      document.getElementById('date').value = new Date().toISOString().split('T')[0];
+      // ตั้งค่าวันที่ปัจจุบันในฟอร์ม โดยอิงตามวันที่ท้องถิ่นประเทศไทยเป๊ะๆ (ป้องการเวลาเพี้ยน)
+      const now = new Date();
+      const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+      document.getElementById('date').value = localDate;
       document.getElementById('sheetUrlInput').value = webAppUrl;
 
       updateCategories();
@@ -437,7 +440,7 @@
     function handleAddTransaction(e) {
       e.preventDefault();
 
-      const txDate = document.getElementById('date').value;
+      const txDate = document.getElementById('date').value; // ได้ค่า เช่น "2026-11-01" ตรงๆ
 
       const newTransaction = {
         id: 'tx_' + Date.now(),
@@ -450,14 +453,11 @@
 
       transactions.unshift(newTransaction);
 
-      // แก้ไขวิธีดึงปีและเดือนให้ถูกต้องแม่นยำ ไม่ให้เดือนเพี้ยน
+      // ล็อกเดือนให้ตรงกับวันที่เลือกเป๊ะๆ ตัดปัญหา Timezone
       if (txDate) {
-        const parts = txDate.split('-');
-        if (parts.length >= 2) {
-          selectedYearMonth = `${parts[0]}-${parts[1]}`;
-          isViewingAll = false;
-          updateMonthDisplay();
-        }
+        selectedYearMonth = txDate.substring(0, 7); // เอา "2026-11" ตรงๆ
+        isViewingAll = false;
+        updateMonthDisplay();
       }
 
       saveLocalAndSync();
@@ -504,11 +504,8 @@
       });
 
       if (txDate && !isViewingAll) {
-        const parts = txDate.split('-');
-        if (parts.length >= 2) {
-          selectedYearMonth = `${parts[0]}-${parts[1]}`;
-          updateMonthDisplay();
-        }
+        selectedYearMonth = txDate.substring(0, 7);
+        updateMonthDisplay();
       }
 
       toggleEditModal();
@@ -601,7 +598,7 @@
       let filtered = transactions;
 
       if (!isViewingAll) {
-        filtered = filtered.filter(t => t.date.startsWith(selectedYearMonth));
+        filtered = filtered.filter(t => t.date && t.date.startsWith(selectedYearMonth));
         const monthStr = document.getElementById('currentMonthDisplay').textContent;
         document.getElementById('labelTotalIncome').textContent = `รายรับรวม (${monthStr})`;
         document.getElementById('labelTotalExpense').textContent = `รายจ่ายรวม (${monthStr})`;
@@ -689,10 +686,18 @@
       document.getElementById('note').value = text;
     }
 
+    // ฟังก์ชันแปลงวันที่แบบไม่ให้ Timezone ดึงวันถอยหลัง
     function formatThaiDate(dateStr) {
       if (!dateStr) return '';
-      const d = new Date(dateStr);
-      return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        const year = parseInt(parts[0]) + 543;
+        const monthNames = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "กันยายน", "ต.ค.", "พ.ย.", "ธ.ค."];
+        const monthIdx = parseInt(parts[1]) - 1;
+        const day = parseInt(parts[2]);
+        return `${day} ${monthNames[monthIdx]} ${String(year).slice(-2)}`;
+      }
+      return dateStr;
     }
 
     function updateSyncStatus(text, colorClass) {
