@@ -339,7 +339,6 @@
 
   <!-- JavaScript Logics -->
   <script>
-    // รหัสผ่านและผู้ใช้ถาวร
     const USER_PASSWORD = "01042005";
 
     const DEFAULT_CATEGORIES = {
@@ -356,7 +355,6 @@
     let isViewingAll = false;
     let selectedCategoryFilter = 'ALL';
 
-    // ตรวจสอบรหัสผ่าน
     function handlePasswordSubmit(e) {
       e.preventDefault();
       const input = document.getElementById('passwordInput').value;
@@ -379,16 +377,13 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      // ตรวจสอบสถานะการล็อกอิน
       if (sessionStorage.getItem('flow_authenticated') === 'true') {
         document.getElementById('lockScreen').classList.add('hidden');
       } else {
         document.getElementById('lockScreen').classList.remove('hidden');
       }
 
-      const now = new Date();
-      const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-      document.getElementById('date').value = localDate;
+      // ปล่อยให้ช่องวันที่เป็นค่าว่างตอนโหลดหน้าเว็บ เพื่อให้ผู้ใช้เลือกวันที่เองได้อย่างอิสระโดยไม่มีการบังคับทับ
       document.getElementById('sheetUrlInput').value = webAppUrl;
 
       updateCategories();
@@ -442,7 +437,7 @@
     function handleAddTransaction(e) {
       e.preventDefault();
 
-      const txDate = document.getElementById('date').value;
+      const txDate = document.getElementById('date').value; // รับค่าวันที่ตามที่ผู้ใช้เลือกในฟอร์มตรงๆ
 
       const newTransaction = {
         id: 'tx_' + Date.now(),
