@@ -57,7 +57,7 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <button onclick="lockApp()" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors flex items-center gap-1.5 text-xs font-medium" title="ออกจากระบบ /Lockout">
+        <button onclick="lockApp()" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors flex items-center gap-1.5 text-xs font-medium" title="ออกจากระบบ / ล็อกหน้าจอ">
           <i data-lucide="lock" class="w-4 h-4"></i>
           <span class="hidden sm:inline">ล็อกหน้าจอ</span>
         </button>
@@ -437,23 +437,32 @@
     function handleAddTransaction(e) {
       e.preventDefault();
 
+      const txDate = document.getElementById('date').value;
+
       const newTransaction = {
         id: 'tx_' + Date.now(),
         type: document.getElementById('type').value,
         category: document.getElementById('category').value,
         amount: parseFloat(document.getElementById('amount').value),
-        date: document.getElementById('date').value,
+        date: txDate,
         note: document.getElementById('note').value.trim()
       };
 
       transactions.unshift(newTransaction);
+
+      // สลับหน้าจอไปที่เดือนของรายการที่เพิ่งเพิ่มอัตโนมัติทันที
+      if (txDate) {
+        selectedYearMonth = txDate.slice(0, 7);
+        isViewingAll = false;
+        updateMonthDisplay();
+      }
+
       saveLocalAndSync();
 
       document.getElementById('amount').value = '';
       document.getElementById('note').value = '';
     }
 
-    // เปิดหน้าต่างแก้ไขข้อมูล
     function openEditModal(id) {
       const tx = transactions.find(t => t.id === id);
       if (!tx) return;
@@ -472,10 +481,10 @@
       document.getElementById('editModal').classList.toggle('hidden');
     }
 
-    // บันทึกรายการที่แก้ไข
     function handleUpdateTransaction(e) {
       e.preventDefault();
       const id = document.getElementById('editId').value;
+      const txDate = document.getElementById('editDate').value;
 
       transactions = transactions.map(t => {
         if (t.id === id) {
@@ -484,12 +493,18 @@
             type: document.getElementById('editType').value,
             category: document.getElementById('editCategory').value,
             amount: parseFloat(document.getElementById('editAmount').value),
-            date: document.getElementById('editDate').value,
+            date: txDate,
             note: document.getElementById('editNote').value.trim()
           };
         }
         return t;
       });
+
+      // สลับหน้าจอไปตามวันที่ที่แก้ไข
+      if (txDate && !isViewingAll) {
+        selectedYearMonth = txDate.slice(0, 7);
+        updateMonthDisplay();
+      }
 
       toggleEditModal();
       saveLocalAndSync();
@@ -614,7 +629,7 @@
 
       if (displayList.length === 0) {
         listEl.innerHTML = '';
-        emptyEl.classList.remove('hidden');
+        emptyEl.classList.add('hidden'); // ปรับให้แสดงช่องตารางว่างแทนที่จะซ่อนทั้งหมด
         return;
       }
 
