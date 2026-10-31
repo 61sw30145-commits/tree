@@ -71,7 +71,7 @@
 
   <main class="max-w-4xl mx-auto px-4 mt-6 space-y-6">
 
-    <!-- Card สรุปยอดเงิน (อัปเดตตามเดือนที่เลือก) -->
+    <!-- Card สรุปยอดเงิน -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
         <div class="flex items-center justify-between text-slate-500 mb-2">
@@ -104,7 +104,7 @@
       </div>
     </div>
 
-    <!-- ฟอร์มเพิ่มรายการ & สถานะการซิงค์ -->
+    <!-- ฟอร์มเพิ่มรายการ -->
     <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-base font-semibold text-slate-900 flex items-center gap-2">
@@ -141,19 +141,18 @@
             <input type="number" id="amount" step="0.01" min="0" placeholder="0.00" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all">
           </div>
 
-          <!-- วันที่ -->
+          <!-- วันที่ (เพิ่ม autocomplete="off" เพื่อกันเบราว์เซอร์จำค่าเก่า) -->
           <div>
             <label class="block text-xs font-medium text-slate-600 mb-1">วันที่</label>
-            <input type="date" id="date" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all">
+            <input type="date" id="date" autocomplete="off" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all">
           </div>
         </div>
 
-        <!-- บันทึกข้อความ (มี Quick Chips) -->
+        <!-- บันทึกข้อความ -->
         <div>
           <label class="block text-xs font-medium text-slate-600 mb-1">บันทึกข้อความเพิ่มเติม</label>
           <input type="text" id="note" placeholder="เช่น ค่าข้าวเช้า, ค่าน้ำมัน, เงินเดือน..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all">
           
-          <!-- Chips ข้อความที่เคยพิมพ์ -->
           <div class="mt-2 flex flex-wrap items-center gap-1.5" id="noteSuggestions">
             <span class="text-[11px] text-slate-400">เคยใช้ล่าสุด:</span>
           </div>
@@ -175,7 +174,6 @@
             รายการย้อนหลัง
           </h2>
 
-          <!-- แผงคลิกเลือกเดือน -->
           <div class="flex flex-wrap items-center gap-2">
             <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1">
               <button onclick="changeMonth(-1)" class="p-1.5 text-slate-600 hover:bg-white rounded-lg transition-colors" title="เดือนก่อนหน้า">
@@ -192,13 +190,11 @@
           </div>
         </div>
 
-        <!-- แผงเลือกหมวดหมู่แบบคลิก -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1" id="categoryFilterChips">
           <span class="text-xs text-slate-400 whitespace-nowrap">หมวดหมู่:</span>
         </div>
       </div>
 
-      <!-- ตารางรายการ -->
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm text-slate-600">
           <thead class="bg-slate-50/70 text-slate-500 text-xs uppercase border-b border-slate-100">
@@ -224,7 +220,7 @@
 
   </main>
 
-  <!-- Modal แก้ไขรายการ (Edit Modal) -->
+  <!-- Modal แก้ไขรายการ -->
   <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 space-y-4">
       <div class="flex justify-between items-center">
@@ -251,7 +247,6 @@
           <div>
             <label class="block text-xs font-medium text-slate-600 mb-1">หมวดหมู่</label>
             <select id="editCategory" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none">
-              <!-- JS injects categories -->
             </select>
           </div>
         </div>
@@ -291,7 +286,6 @@
         </button>
       </div>
 
-      <!-- ส่วนเพิ่มหมวดหมู่ใหม่ -->
       <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 space-y-3">
         <h4 class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
           <i data-lucide="folder-plus" class="w-4 h-4"></i> เพิ่มหมวดหมู่ใหม่
@@ -365,6 +359,9 @@
         document.getElementById('passwordInput').value = '';
         errorEl.classList.add('hidden');
         sessionStorage.setItem('flow_authenticated', 'true');
+        
+        // ** บังคับเคลียร์ช่องวันที่ให้ว่างเปล่าทันทีเมื่อปลดล็อกสำเร็จ (ป้องกันเบราว์เซอร์จำค่าวันที่เก่า) **
+        document.getElementById('date').value = '';
       } else {
         errorEl.classList.remove('hidden');
         document.getElementById('passwordInput').value = '';
@@ -380,10 +377,12 @@
       if (sessionStorage.getItem('flow_authenticated') === 'true') {
         document.getElementById('lockScreen').classList.add('hidden');
       } else {
+        document.getElementById('lockScreen').classList.add('hidden'); // ป้องกันหน้าค้าง
         document.getElementById('lockScreen').classList.remove('hidden');
       }
 
-      // ปล่อยให้ช่องวันที่เป็นค่าว่างตอนโหลดหน้าเว็บ เพื่อให้ผู้ใช้เลือกวันที่เองได้อย่างอิสระโดยไม่มีการบังคับทับ
+      // ** บังคับเคลียร์ช่องวันที่ให้ว่างเปล่าทันทีตอนเปิดหน้าเว็บ เพื่อให้ผู้ใช้เลือกเองสดๆ โดยไม่มีค่าเก่ามาทับ **
+      document.getElementById('date').value = '';
       document.getElementById('sheetUrlInput').value = webAppUrl;
 
       updateCategories();
@@ -437,7 +436,7 @@
     function handleAddTransaction(e) {
       e.preventDefault();
 
-      const txDate = document.getElementById('date').value; // รับค่าวันที่ตามที่ผู้ใช้เลือกในฟอร์มตรงๆ
+      const txDate = document.getElementById('date').value; // ค่าวันที่ที่ผู้ใช้เลือกสดๆ จากปฏิทิน
 
       const newTransaction = {
         id: 'tx_' + Date.now(),
@@ -459,6 +458,7 @@
       saveLocalAndSync();
 
       document.getElementById('amount').value = '';
+      document.getElementById('date').value = ''; // เคลียร์ช่องวันที่หลังบันทึก
       document.getElementById('note').value = '';
     }
 
