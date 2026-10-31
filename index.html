@@ -1,482 +1,779 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="th" class="h-full bg-slate-50">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.7">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บันทึกรายรับรายจ่าย มินิมอล</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Prompt & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            850: '#1e293b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 </head>
-<body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="th"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Minimal Photo Booth (2 Shots - POS Ready)&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;style id="dynamic-print-style"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>/* -------------------------------------------------- */</p>
-<p class="p1"><span class="Apple-converted-space">    </span>/* ตั้งค่าสำหรับการพิมพ์สลิป (Thermal Printer) */</p>
-<p class="p1"><span class="Apple-converted-space">    </span>/* -------------------------------------------------- */</p>
-<p class="p1"><span class="Apple-converted-space">    </span>@media print {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>@page {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>size: 70mm 210mm;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>margin: 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>body {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>margin: 0 !important;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>padding: 0 !important;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>background: #fff !important;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>/* ซ่อนองค์ประกอบหน้าจอทั้งหมด */</p>
-<p class="p1"><span class="Apple-converted-space">      </span>body * {<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>visibility: hidden !important;<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>/* แสดงเฉพาะพื้นที่รูปที่จะพิมพ์ */</p>
-<p class="p1"><span class="Apple-converted-space">      </span>#print-area, #print-area *, #print-image-tag {<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>visibility: visible !important;<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>#print-area {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>position: absolute;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>left: 0;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>top: 0;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>width: 70mm !important;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>height: auto;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>display: block !important;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>#print-image-tag {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>width: 100% !important;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>height: auto !important;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>display: block !important;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>object-fit: contain;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>#back-button-container, .bg-white, #final-canvas, .no-print {<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>display: none !important;<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>#webcam { transform: scaleX(-1); }</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>/* มาร์กมุม 4 มุมสำหรับกรอบถ่ายรูป */</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.corner-mark {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>position: absolute;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>width: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>height: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>border-color: #ffffff;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>border-style: solid;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>pointer-events: none;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.top-left { top: -2px; left: -2px; border-width: 3px 0 0 3px; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.top-right { top: -2px; right: -2px; border-width: 3px 3px 0 0; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.bottom-left { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.bottom-right { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col items-center justify-center p-4 relative"&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- ปุ่มย้อนกลับ --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="back-button-container" class="absolute top-6 left-6 hidden"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;button onclick="goBack()" class="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 rounded-full shadow-sm hover:border-stone-800 transition text-sm font-medium text-stone-700"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>ย้อนกลับ</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Step 1: หน้าแรก --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="step-1" class="text-center space-y-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h1 class="text-4xl font-light tracking-wide"&gt;PHOTO BOOTH POS&lt;/h1&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;button onclick="goToStep(15)" class="px-8 py-3 bg-stone-800 text-white rounded-full hover:bg-stone-700 transition shadow-md"&gt;กดเพื่อเริ่มถ่ายรูป&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Step 1.5: เลือกจำนวนช็อต (2 ช็อต) --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="step-15" class="hidden text-center space-y-6 w-full max-w-md"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2 class="text-2xl font-light"&gt;เลือกจำนวนช็อต&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="flex justify-center"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button onclick="selectShotCount(2)" class="p-6 bg-white border border-stone-200 rounded-2xl shadow-sm hover:border-stone-800 transition flex flex-col items-center gap-2 group w-64"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;span class="text-3xl font-light group-hover:scale-110 transition"&gt;2&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;span class="text-sm font-medium text-stone-600"&gt;ถ่าย 2 ช็อต (70x210 mm)&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Step 2: เลือกกรอบรูป --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="step-2" class="hidden text-center space-y-6 w-full max-w-lg"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2 class="text-2xl font-light"&gt;เลือกกรอบรูป&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="frame-list" class="grid grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto p-2"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Step 3: กล้อง &amp; กำหนดพื้นที่รูปภาพ --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="step-3" class="hidden text-center space-y-4 w-full max-w-md"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="webcam-container" class="relative w-full bg-black rounded-lg overflow-hidden shadow-sm flex items-center justify-center"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;video id="webcam" autoplay playsinline class="w-full h-auto object-contain"&gt;&lt;/video&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;!-- กรอบไกด์กำหนดตำแหน่งรูปถ่าย --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="camera-guide" class="absolute inset-0 pointer-events-none flex items-center justify-center z-10"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="guide-box" class="w-[85%] aspect-[65/50] border-2 border-white/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] relative flex items-center justify-center transition-all duration-300 rounded-md"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="corner-mark top-left"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="corner-mark top-right"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="corner-mark bottom-left"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="corner-mark bottom-right"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="countdown" class="absolute inset-0 flex items-center justify-center text-6xl font-bold text-white bg-black/40 hidden z-30"&gt;3&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- แผงควบคุมและแสดงพรีวิวภาพสำเร็จใส่กรอบ --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="retake-controls" class="hidden space-y-4"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="flex flex-col items-center"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;p class="text-xs text-stone-500 mb-2"&gt;แตะที่บริเวณภาพช็อตที่ต้องการถ่ายใหม่&lt;/p&gt;</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- แสดงรูปแถบสำเร็จแบบใส่กรอบ --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="relative w-full max-w-[220px] shadow-lg rounded-lg overflow-hidden border border-stone-200 bg-white"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;canvas id="preview-framed-canvas" class="w-full h-auto block"&gt;&lt;/canvas&gt;</p>
-<p class="p2"><span class="Apple-converted-space">          </span></p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;!-- เลเยอร์คลิกเลือกช็อตถ่ายใหม่ --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;div id="shot-click-overlays" class="absolute inset-0 pointer-events-auto"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- ช็อตที่ 1 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div onclick="retakeSingleShot(0)"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                 </span>class="absolute left-[3.57%] w-[92.86%] top-[30.95%] h-[23.81%] cursor-pointer hover:bg-black/20 transition rounded flex items-center justify-center group border border-transparent hover:border-white/60"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;span class="opacity-0 group-hover:opacity-100 bg-stone-900/80 text-white text-[11px] px-2.5 py-1 rounded-full shadow"&gt;ถ่ายใหม่ (ช็อต 1)&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- ช็อตที่ 2 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div onclick="retakeSingleShot(1)"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                 </span>class="absolute left-[3.57%] w-[92.86%] top-[57.19%] h-[23.81%] cursor-pointer hover:bg-black/20 transition rounded flex items-center justify-center group border border-transparent hover:border-white/60"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;span class="opacity-0 group-hover:opacity-100 bg-stone-900/80 text-white text-[11px] px-2.5 py-1 rounded-full shadow"&gt;ถ่ายใหม่ (ช็อต 2)&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="flex gap-2"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onclick="goToStep(4)" class="flex-1 py-2.5 bg-stone-800 text-white rounded-full hover:bg-stone-700 transition font-medium shadow-sm"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>ไปหน้าพิมพ์รูป</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onclick="triggerDirectPrint()" class="flex-1 py-2.5 bg-emerald-600 text-white rounded-full hover:bg-emerald-500 transition font-medium shadow-sm flex items-center justify-center gap-1"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"&gt;&lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/&gt;&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>พิมพ์ด่วนทันที</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Step 4: สั่งพิมพ์ --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="step-4" class="hidden text-center space-y-6 w-full max-w-md"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2 class="text-2xl font-light"&gt;พิมพ์รูปภาพ / บันทึกไฟล์&lt;/h2&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="print-area" class="flex justify-center"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;canvas id="final-canvas" class="max-w-full rounded shadow-md border border-stone-200"&gt;&lt;/canvas&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;img id="print-image-tag" class="hidden" alt="Print Render"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- แผงตั้งค่าการพิมพ์ --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="bg-white p-4 rounded-xl border border-stone-200 space-y-3"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="flex flex-col gap-2 pt-1"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onclick="triggerPrint()" class="w-full py-3 bg-stone-800 text-white rounded-xl hover:bg-stone-700 transition font-medium flex items-center justify-center gap-2 text-base shadow-sm"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>พิมพ์ภาพ (Print)</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onclick="downloadImage()" class="w-full py-2.5 bg-white text-stone-800 border border-stone-300 hover:bg-stone-50 rounded-xl transition font-medium text-sm flex items-center justify-center gap-2"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>บันทึกรูปภาพ / AirDrop</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;button onclick="goToStep(3)" class="text-sm text-stone-500 hover:text-stone-800 underline"&gt;แก้ไข/ถ่ายใหม่&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>let currentStep = 1;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>let stepHistory = [1];</p>
-<p class="p1"><span class="Apple-converted-space">    </span>let selectedFrame = null;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>let targetShotCount = 2;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>let capturedImages = [];</p>
-<p class="p1"><span class="Apple-converted-space">    </span>let frames = [];</p>
-<p class="p1"><span class="Apple-converted-space">    </span>let captureTimer = null;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>let isCapturing = false;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>let mediaStream = null;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>async function loadConfig() {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const res = await fetch('config.json');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const config = await res.json();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>frames = config.frames || [];</p>
-<p class="p1"><span class="Apple-converted-space">      </span>} catch (e) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>frames = [</p>
-<p class="p1"><span class="Apple-converted-space">          </span>{ id: 1, name: "ความรักมันออกแบบไม่ได้", file: "4.png", shots: 2 },</p>
-<p class="p1"><span class="Apple-converted-space">          </span>{ id: 2, name: "ข่าวสังคมเขาชมไม่สร่าง", file: "5.png", shots: 2 },</p>
-<p class="p1"><span class="Apple-converted-space">          </span>{ id: 3, name: "ไอเลิฟมช", file: "7.png", shots: 2 },</p>
-<p class="p1"><span class="Apple-converted-space">          </span>{ id: 4, name: "ไอเลิฟสังคม", file: "6.png", shots: 2 },</p>
-<p class="p1"><span class="Apple-converted-space">          </span>{ id: 5, name: "ไอเลิฟสังวิท", file: "8.png", shots: 2 },</p>
-<p class="p1"><span class="Apple-converted-space">          </span>{ id: 6, name: "ไอเลิฟอาเซียน", file: "9.png", shots: 2 },</p>
-<p class="p1"><span class="Apple-converted-space">          </span>{ id: 7, name: "ไอเลิฟจีออ", file: "10.png", shots: 2 },</p>
-<p class="p1"><span class="Apple-converted-space">          </span>{ id: 8, name: "ไอเลิฟซ้อคเฟส", file: "11.png", shots: 2 },</p>
-<p class="p1"><span class="Apple-converted-space">          </span>{ id: 9, name: "มช.ดิวะ", file: "13.png", shots: 2 },</p>
-<p class="p1"><span class="Apple-converted-space">          </span>{ id: 10, name: "สังคมดิวะ", file: "12.png", shots: 2 },</p>
-<p class="p1"><span class="Apple-converted-space">          </span>{ id: 11, name: "คิดถึงเสมอ", file: "14.png", shots: 2 },</p>
-<p class="p1"><span class="Apple-converted-space">          </span>{ id: 12, name: "เค้ารักตี๋", file: "15.png", shots: 2 },</p>
-<p class="p1"><span class="Apple-converted-space">          </span>{ id: 13, name: "เค้ารักพี่คนสวย", file: "16.png", shots: 2 }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>];</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>loadConfig();</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function selectShotCount(count) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>targetShotCount = count;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>capturedImages = new Array(count).fill(null);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>goToStep(2);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function goToStep(step, isBack = false) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (isCapturing) stopCapture();</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (currentStep === 3 &amp;&amp; step !== 3) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>stopCamera();</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>document.querySelectorAll('[id^="step-"]').forEach(el =&gt; el.classList.add('hidden'));</p>
-<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById(`step-${step}`).classList.remove('hidden');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (!isBack &amp;&amp; currentStep !== step) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>stepHistory.push(step);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>currentStep = step;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const backBtn = document.getElementById('back-button-container');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (step === 1) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>backBtn.classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>backBtn.classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (step === 2) renderFrames();</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (step === 3) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (!capturedImages[0]) {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>startCameraAndCapture();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>showRetakeUI();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (step === 4) renderFinalCanvas(false);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function goBack() {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (stepHistory.length &gt; 1) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>stepHistory.pop();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const prevStep = stepHistory[stepHistory.length - 1];</p>
-<p class="p1"><span class="Apple-converted-space">        </span>goToStep(prevStep, true);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function stopCapture() {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>isCapturing = false;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (captureTimer) clearInterval(captureTimer);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('countdown').classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function stopCamera() {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (mediaStream) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>mediaStream.getTracks().forEach(track =&gt; track.stop());</p>
-<p class="p1"><span class="Apple-converted-space">        </span>mediaStream = null;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function renderFrames() {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const container = document.getElementById('frame-list');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const filteredFrames = frames.filter(f =&gt; f.shots === targetShotCount);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (filteredFrames.length === 0) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>container.innerHTML = `&lt;p class="col-span-2 text-stone-500 py-8"&gt;ไม่พบกรอบรูปสำหรับ ${targetShotCount} ช็อต&lt;/p&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>container.innerHTML = filteredFrames.map(f =&gt; `</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div onclick="selectFrame('${f.file}')" class="group border border-stone-200 p-3 rounded-xl cursor-pointer hover:border-stone-800 bg-white shadow-sm hover:shadow-md transition flex flex-col items-center space-y-2"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="w-full aspect-[70/210] bg-stone-100 rounded-lg overflow-hidden flex items-center justify-center p-1 border border-stone-100 relative"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;img src="${f.file}" alt="${f.name}" class="w-full h-full object-contain group-hover:scale-105 transition duration-200 z-10" onerror="this.src='https://via.placeholder.com/150?text=No+Preview'"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;p class="text-sm font-medium text-stone-700 group-hover:text-stone-900"&gt;${f.name}&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>`).join('');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function selectFrame(file) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>selectedFrame = file;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>goToStep(3);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>async function startCameraAndCapture() {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (!mediaStream) {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>mediaStream = await navigator.mediaDevices.getUserMedia({<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>video: { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: "user" },<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>audio: false<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">          </span>});</p>
-<p class="p1"><span class="Apple-converted-space">          </span>document.getElementById('webcam').srcObject = mediaStream;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>document.getElementById('webcam-container').classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>document.getElementById('retake-controls').classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>document.getElementById('camera-guide').classList.remove('hidden');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>setTimeout(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>capturedImages = new Array(targetShotCount).fill(null);</p>
-<p class="p1"><span class="Apple-converted-space">          </span>isCapturing = true;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>captureNext(0);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}, 1000);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>} catch (err) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>alert("ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตสิทธิ์การใช้กล้อง");</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function captureNext(index) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (!isCapturing || index &gt;= targetShotCount) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>showRetakeUI();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>let count = 3;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const cdEl = document.getElementById('countdown');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>cdEl.classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>cdEl.innerText = count;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>captureTimer = setInterval(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>count--;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (count &gt; 0) {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>cdEl.innerText = count;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>clearInterval(captureTimer);</p>
-<p class="p1"><span class="Apple-converted-space">          </span>cdEl.classList.add('hidden');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">          </span>takePhoto(index);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">          </span>setTimeout(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (isCapturing) captureNext(index + 1);</p>
-<p class="p1"><span class="Apple-converted-space">          </span>}, 1000);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}, 1000);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function takePhoto(index) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const video = document.getElementById('webcam');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const canvas = document.createElement('canvas');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const vWidth = video.videoWidth;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const vHeight = video.videoHeight;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>canvas.width = 975;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>canvas.height = 750;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const targetRatio = 975 / 750;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const videoRatio = vWidth / vHeight;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>let cropWidth, cropHeight, startX, startY;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (videoRatio &gt; targetRatio) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>cropHeight = vHeight;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>cropWidth = vHeight * targetRatio;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>startX = (vWidth - cropWidth) / 2;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>startY = 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>cropWidth = vWidth;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>cropHeight = vWidth / targetRatio;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>startX = 0;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>startY = (vHeight - cropHeight) / 2;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const ctx = canvas.getContext('2d');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>ctx.translate(canvas.width, 0);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>ctx.scale(-1, 1);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>ctx.drawImage(video, startX, startY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>capturedImages[index] = canvas.toDataURL('image/png');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function retakeSingleShot(index) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>isCapturing = true;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('webcam-container').classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('retake-controls').classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('camera-guide').classList.remove('hidden');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>let count = 3;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const cdEl = document.getElementById('countdown');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>cdEl.classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>cdEl.innerText = count;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>captureTimer = setInterval(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>count--;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (count &gt; 0) {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>cdEl.innerText = count;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>clearInterval(captureTimer);</p>
-<p class="p1"><span class="Apple-converted-space">          </span>cdEl.classList.add('hidden');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">          </span>takePhoto(index);</p>
-<p class="p1"><span class="Apple-converted-space">          </span>showRetakeUI();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}, 1000);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>async function showRetakeUI() {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>isCapturing = false;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('camera-guide').classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('webcam-container').classList.add('hidden');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const previewCanvas = document.getElementById('preview-framed-canvas');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const ctx = previewCanvas.getContext('2d');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>previewCanvas.width = 1050;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>previewCanvas.height = 3150;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>ctx.fillStyle = "#FFFFFF";</p>
-<p class="p1"><span class="Apple-converted-space">      </span>ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const rawImages = await Promise.all(capturedImages.map(imgSrc =&gt; loadImage(imgSrc)));</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const frameWidth = 975;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const frameHeight = 750;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const marginX = 37.5;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const topYs = [975, 1801.5];</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>rawImages.forEach((img, i) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (img) {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>ctx.drawImage(img, marginX, topYs[i], frameWidth, frameHeight);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (selectedFrame) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const frameImg = await loadImage(selectedFrame);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (frameImg) ctx.drawImage(frameImg, 0, 0, previewCanvas.width, previewCanvas.height);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('retake-controls').classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function loadImage(src) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>return new Promise((resolve, reject) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (!src) return resolve(null);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const img = new Image();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>img.onload = () =&gt; resolve(img);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>img.onerror = reject;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>img.src = src;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>});</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>function createDitheredImage(imgElement, scale = 1.0, contrast = 1.35) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const canvas</p>
+<body class="h-full flex flex-col font-sans text-slate-800 antialiased selection:bg-emerald-100 selection:text-emerald-800">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/80">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                    <i data-lucide="wallet" class="w-5 h-5 text-emerald-400"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-semibold text-slate-900 leading-none">FlowFinance TH</h1>
+                    <p class="text-xs text-slate-500 mt-1">บันทึกรายรับ-รายจ่าย มินิมอล</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <!-- Sync Indicator Button -->
+                <button id="syncStatusBtn" onclick="openSettingsModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors">
+                    <span id="syncDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+                    <span id="syncLabel">โหมดเครื่องนี้</span>
+                </button>
+                <!-- Settings Button -->
+                <button onclick="openSettingsModal()" class="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors" title="ตั้งค่าและซิงค์ข้อมูล">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Column: Add Entry & Quick Suggestions (5 Cols) -->
+        <section class="lg:col-span-5 flex flex-col gap-6">
+            
+            <!-- Overall Balance Summary Cards -->
+            <div class="grid grid-cols-1 gap-4">
+                <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white shadow-xl shadow-slate-900/10 relative overflow-hidden">
+                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                    <span class="text-xs uppercase tracking-wider text-slate-400 font-medium">ยอดเงินคงเหลือสุทธิ</span>
+                    <div class="text-3xl font-bold tracking-tight mt-1" id="totalBalance">฿0.00</div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-slate-700/60">
+                        <div>
+                            <div class="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+                                <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i> รายรับรวม
+                            </div>
+                            <div class="text-lg font-semibold text-slate-100 mt-0.5" id="totalIncome">฿0.00</div>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-1.5 text-xs text-rose-400 font-medium">
+                                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> รายจ่ายรวม
+                            </div>
+                            <div class="text-lg font-semibold text-slate-100 mt-0.5" id="totalExpense">฿0.00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Transaction Form -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm">
+                <h2 class="text-base font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-600"></i>
+                    บันทึกรายการใหม่
+                </h2>
+
+                <form id="transactionForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                    <!-- Type Selector (Income / Expense) -->
+                    <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl text-sm font-medium">
+                        <button type="button" id="btnExpense" onclick="setTransactionType('expense')" class="py-2 rounded-lg transition-all text-center flex items-center justify-center gap-2 bg-white text-rose-600 shadow-sm font-semibold">
+                            <i data-lucide="minus" class="w-4 h-4"></i> รายจ่าย
+                        </button>
+                        <button type="button" id="btnIncome" onclick="setTransactionType('income')" class="py-2 rounded-lg transition-all text-center flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900">
+                            <i data-lucide="plus" class="w-4 h-4"></i> รายรับ
+                        </button>
+                    </div>
+
+                    <!-- Amount Input -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">จำนวนเงิน (บาท)</label>
+                        <div class="relative">
+                            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-medium">฿</span>
+                            <input type="number" id="txAmount" step="0.01" min="0.01" required placeholder="0.00" class="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 text-slate-900 font-semibold text-lg transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Category & Date Row -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">หมวดหมู่</label>
+                            <select id="txCategory" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 text-sm text-slate-800 transition-all">
+                                <!-- Categories populated dynamically -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">วันที่</label>
+                            <input type="date" id="txDate" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 text-sm text-slate-800 transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Description / Note Input -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">บันทึกข้อความ / คำอธิบาย</label>
+                        <input type="text" id="txNote" required placeholder="เช่น ค่าอาหารเช้า, เงินเดือน, ค่าน้ำมัน" autocomplete="off" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 text-sm text-slate-800 transition-all">
+                    </div>
+
+                    <!-- Quick Suggestions Chips (Auto-filled from history) -->
+                    <div id="quickSuggestionsContainer" class="hidden space-y-1.5">
+                        <span class="text-[11px] font-medium text-slate-500 flex items-center gap-1">
+                            <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500"></i> คลิกเพื่อเลือกข้อความที่พิมพ์บ่อย:
+                        </span>
+                        <div id="quickSuggestions" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pt-0.5">
+                            <!-- Chips added here -->
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl shadow-lg shadow-slate-900/10 transition-all flex items-center justify-center gap-2 active:scale-[0.99]">
+                        <i data-lucide="check" class="w-4 h-4"></i> บันทึกรายการ
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Right Column: Transactions History & Filters (7 Cols) -->
+        <section class="lg:col-span-7 flex flex-col gap-6">
+            
+            <!-- Filters & Search Bar -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm space-y-3">
+                <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                    <!-- Search Input -->
+                    <div class="relative flex-1">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="searchInput" oninput="renderTransactions()" placeholder="ค้นหาตามข้อความ หรือ หมวดหมู่..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all">
+                    </div>
+                    
+                    <!-- Month Selector -->
+                    <div class="flex items-center gap-2">
+                        <input type="month" id="monthFilter" onchange="renderTransactions()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 text-slate-700">
+                    </div>
+                </div>
+
+                <!-- Type Filter Tabs -->
+                <div class="flex items-center gap-2 pt-1 border-t border-slate-100 text-xs font-medium text-slate-600">
+                    <span class="text-slate-400 mr-1">ตัวกรอง:</span>
+                    <button onclick="setFilterType('all')" id="tabAll" class="px-3 py-1 rounded-lg bg-slate-900 text-white transition-all">ทั้งหมด</button>
+                    <button onclick="setFilterType('income')" id="tabIncome" class="px-3 py-1 rounded-lg hover:bg-slate-100 transition-all">เฉพาะรายรับ</button>
+                    <button onclick="setFilterType('expense')" id="tabExpense" class="px-3 py-1 rounded-lg hover:bg-slate-100 transition-all">เฉพาะรายจ่าย</button>
+                </div>
+            </div>
+
+            <!-- Transaction List Grouped by Date -->
+            <div class="flex-1 space-y-4 min-h-[300px]">
+                <div class="flex items-center justify-between px-1">
+                    <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">ประวัติรายการย้อนหลัง</h2>
+                    <span id="txCountBadge" class="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-medium">0 รายการ</span>
+                </div>
+
+                <div id="transactionList" class="space-y-4">
+                    <!-- Dynamic rendering of list -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Settings & Cloud Sync Modal -->
+    <div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-6 transform scale-95 transition-transform duration-200 overflow-y-auto max-h-[90vh]" id="settingsModalContainer">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="p-2 bg-slate-100 rounded-xl text-slate-800">
+                        <i data-lucide="cloud-cog" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-slate-900">ตั้งค่าการซิงค์ & สำรองข้อมูล</h3>
+                        <p class="text-xs text-slate-500">ซิงค์ข้ามอุปกรณ์และจัดการข้อมูลย้อนหลัง</p>
+                    </div>
+                </div>
+                <button onclick="closeSettingsModal()" class="p-2 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Sync Setup Tab / Google Apps Script API -->
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Google Sheets Web App API URL</label>
+                    <p class="text-xs text-slate-500 mb-2">เชื่อมต่อกับ Google Sheet เพื่อซิงค์ข้อมูลฟรีระหว่างมือถือและคอมพิวเตอร์ผ่าน GitHub Pages</p>
+                    <input type="url" id="sheetApiUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 outline-none">
+                </div>
+
+                <div class="flex gap-2">
+                    <button onclick="saveSyncSettings()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> บันทึก & ดึงข้อมูลจากคลาวด์
+                    </button>
+                </div>
+
+                <!-- Setup Instructions Accordion -->
+                <details class="text-xs text-slate-600 bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+                    <summary class="font-semibold cursor-pointer text-slate-700 hover:text-slate-900 flex items-center justify-between">
+                        <span>วิธีเปิดใช้งาน Google Sheets Sync & GitHub Pages</span>
+                    </summary>
+                    <div class="mt-3 space-y-2.5 text-slate-600 leading-relaxed">
+                        <p class="font-semibold text-slate-800">1. ขั้นตอนสร้างระบบซิงค์ (Google Sheets):</p>
+                        <ol class="list-decimal list-inside space-y-1 pl-1">
+                            <li>สร้าง <b>Google Sheet</b> ใหม่ใน Google Drive</li>
+                            <li>ไปที่เมนู <b>ส่วนขยาย (Extensions) &gt; Apps Script</b></li>
+                            <li>ลบโค้ดเดิมออก วางโค้ด Google Apps Script สั้นๆ สำหรับรับ/ส่งข้อมูล JSON</li>
+                            <li>กด <b>นำออกใช้งาน (Deploy) &gt; การนำออกใช้งานใหม่ (New Deployment)</b></li>
+                            <li>เลือกประเภทเป็น <b>เว็บแอป (Web app)</b> และตั้งค่า <u>ผู้ที่มีสิทธิ์เข้าถึง (Who has access)</u> เป็น <b>"ทุกคน (Anyone)"</b></li>
+                            <li>คัดลอก Web App URL นำมาวางในช่องด้านบนแล้วกดบันทึก</li>
+                        </ol>
+                        <p class="font-semibold text-slate-800 pt-1">2. ขั้นตอนลงเว็บด้วย GitHub Pages:</p>
+                        <ol class="list-decimal list-inside space-y-1 pl-1">
+                            <li>อัปโหลดไฟล์ <code class="bg-slate-200 px-1 py-0.5 rounded">index.html</code> นี้ขึ้น Repository บน GitHub</li>
+                            <li>ไปที่ <b>Settings &gt; Pages</b> เลือก Branch เป็น <code class="bg-slate-200 px-1 py-0.5 rounded">main</code> แล้วกด Save</li>
+                            <li>เปิดใช้งานผ่าน URL ของ GitHub Pages ได้ทันทีทุกอุปกรณ์!</li>
+                        </ol>
+                    </div>
+                </details>
+            </div>
+
+            <hr class="border-slate-100">
+
+            <!-- Data Backup / Import / Export -->
+            <div class="space-y-3">
+                <h4 class="text-xs font-semibold uppercase text-slate-600">จัดการไฟล์ข้อมูล (Manual Backup)</h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="exportJSON()" class="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all">
+                        <i data-lucide="download" class="w-4 h-4"></i> ส่งออก JSON
+                    </button>
+                    <button onclick="exportCSV()" class="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> ส่งออก CSV (Excel)
+                    </button>
+                </div>
+                <label class="block w-full py-2.5 px-3 bg-slate-50 hover:bg-slate-100 border border-dashed border-slate-300 rounded-xl text-xs font-semibold text-slate-600 text-center cursor-pointer transition-all">
+                    <i data-lucide="upload" class="w-4 h-4 inline mr-1 text-slate-500"></i> นำเข้าข้อมูลจากไฟล์ JSON
+                    <input type="file" id="importFileInput" accept=".json" onchange="importJSON(event)" class="hidden">
+                </label>
+            </div>
+
+            <div class="pt-2 flex justify-between items-center text-xs">
+                <button onclick="confirmClearAll()" class="text-rose-600 hover:text-rose-700 font-medium">ล้างข้อมูลทั้งหมดในเครื่อง</button>
+                <button onclick="closeSettingsModal()" class="px-4 py-2 bg-slate-900 text-white font-medium rounded-xl">เสร็จสิ้น</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 space-y-4">
+            <h3 class="text-base font-semibold text-slate-900" id="confirmTitle">ยืนยันการทำรายการ?</h3>
+            <p class="text-xs text-slate-500" id="confirmMessage">รายการนี้ไม่สามารถย้อนกลับได้</p>
+            <div class="flex gap-2 justify-end pt-2">
+                <button onclick="closeConfirmModal(false)" class="px-3.5 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs font-medium">ยกเลิก</button>
+                <button id="confirmOkBtn" onclick="closeConfirmModal(true)" class="px-3.5 py-2 bg-rose-600 text-white hover:bg-rose-700 rounded-xl text-xs font-medium">ตกลงลบ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // หมวดหมู่ภาษาไทย (Thai Categories)
+        const CATEGORIES = {
+            expense: ['อาหารและเครื่องดื่ม', 'การเดินทาง/ค่าน้ำมัน', 'ของใช้ในบ้าน/ของสด', 'ค่าสาธารณูปโภค', 'ความบันเทิง/ท่องเที่ยว', 'ที่พักอาศัย/ค่าเช่า', 'สุขภาพ/รักษาพยาบาล', 'ช้อปปิ้ง', 'อื่นๆ'],
+            income: ['เงินเดือน', 'งานฟรีแลนซ์/รับจ้าง', 'การลงทุน/ปันผล', 'โบนัส/ของขวัญ', 'ธุรกิจส่วนตัว', 'รายรับอื่นๆ']
+        };
+
+        // Application State
+        let transactions = JSON.parse(localStorage.getItem('flowfinance_txs')) || [];
+        let currentType = 'expense';
+        let currentFilter = 'all';
+        let syncApiUrl = localStorage.getItem('flowfinance_sync_url') || '';
+        let pendingConfirmAction = null;
+
+        // Initialization
+        window.onload = function() {
+            // Set default date to today
+            document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+
+            // Set default month filter to current month YYYY-MM
+            const today = new Date();
+            const monthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            document.getElementById('monthFilter').value = monthStr;
+
+            // Load categories & render UI
+            updateCategoryDropdown();
+            updateSuggestions();
+            renderTransactions();
+            updateSyncStatusUI();
+
+            // Auto sync on start if API configured
+            if (syncApiUrl) {
+                fetchCloudData();
+            }
+
+            // Initialize Lucide icons
+            lucide.createIcons();
+        };
+
+        // Handle Type Toggle (Expense / Income)
+        function setTransactionType(type) {
+            currentType = type;
+            const btnExpense = document.getElementById('btnExpense');
+            const btnIncome = document.getElementById('btnIncome');
+
+            if (type === 'expense') {
+                btnExpense.className = "py-2 rounded-lg transition-all text-center flex items-center justify-center gap-2 bg-white text-rose-600 shadow-sm font-semibold";
+                btnIncome.className = "py-2 rounded-lg transition-all text-center flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900";
+            } else {
+                btnIncome.className = "py-2 rounded-lg transition-all text-center flex items-center justify-center gap-2 bg-white text-emerald-600 shadow-sm font-semibold";
+                btnExpense.className = "py-2 rounded-lg transition-all text-center flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900";
+            }
+            updateCategoryDropdown();
+        }
+
+        // Update Category Dropdown Options
+        function updateCategoryDropdown() {
+            const select = document.getElementById('txCategory');
+            select.innerHTML = '';
+            CATEGORIES[currentType].forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                select.appendChild(opt);
+            });
+        }
+
+        // Save Transaction
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('txAmount').value);
+            const category = document.getElementById('txCategory').value;
+            const date = document.getElementById('txDate').value;
+            const note = document.getElementById('txNote').value.trim();
+
+            if (!amount || amount <= 0 || !note) {
+                showToast('กรุณากรอกจำนวนเงินและข้อความให้ถูกต้อง', 'error');
+                return;
+            }
+
+            const newTx = {
+                id: 'tx_' + Date.now() + Math.random().toString(36).substr(2, 4),
+                type: currentType,
+                amount: amount,
+                category: category,
+                date: date,
+                note: note,
+                createdAt: new Date().toISOString()
+            };
+
+            transactions.unshift(newTx);
+            saveDataLocally();
+            renderTransactions();
+            updateSuggestions();
+
+            // Reset note & amount
+            document.getElementById('txAmount').value = '';
+            document.getElementById('txNote').value = '';
+
+            showToast('บันทึกรายการสำเร็จแล้ว', 'success');
+
+            // Trigger sync if enabled
+            if (syncApiUrl) {
+                syncToCloud(newTx);
+            }
+        }
+
+        // Render Transactions History & Calculations
+        function renderTransactions() {
+            const listEl = document.getElementById('transactionList');
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            const monthVal = document.getElementById('monthFilter').value; // YYYY-MM
+
+            let totalInc = 0;
+            let totalExp = 0;
+
+            const filtered = transactions.filter(tx => {
+                // Type Filter
+                if (currentFilter !== 'all' && tx.type !== currentFilter) return false;
+                
+                // Search Filter
+                if (searchVal && !(tx.note.toLowerCase().includes(searchVal) || tx.category.toLowerCase().includes(searchVal))) {
+                    return false;
+                }
+
+                // Month Filter
+                if (monthVal && !tx.date.startsWith(monthVal)) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            // Calculate metrics across month filter
+            transactions.forEach(tx => {
+                if (!monthVal || tx.date.startsWith(monthVal)) {
+                    if (tx.type === 'income') totalInc += tx.amount;
+                    if (tx.type === 'expense') totalExp += tx.amount;
+                }
+            });
+
+            // Update Summary UI
+            document.getElementById('totalIncome').textContent = formatCurrency(totalInc);
+            document.getElementById('totalExpense').textContent = formatCurrency(totalExp);
+            document.getElementById('totalBalance').textContent = formatCurrency(totalInc - totalExp);
+            document.getElementById('txCountBadge').textContent = `${filtered.length} รายการ`;
+
+            listEl.innerHTML = '';
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `
+                    <div class="bg-white rounded-2xl p-8 text-center border border-slate-200/80">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="inbox" class="w-6 h-6"></i>
+                        </div>
+                        <p class="text-slate-600 font-medium text-sm">ไม่พบรายการบันทึก</p>
+                        <p class="text-xs text-slate-400 mt-1">ลองเปลี่ยนคำค้นหา หรือเปลี่ยนตัวกรองเดือน</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            // Group Transactions by Date
+            const grouped = {};
+            filtered.forEach(tx => {
+                if (!grouped[tx.date]) grouped[tx.date] = [];
+                grouped[tx.date].push(tx);
+            });
+
+            // Render Groups
+            Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)).forEach(dateStr => {
+                const groupDate = new Date(dateStr + 'T00:00:00');
+                const formattedDate = groupDate.toLocaleDateString('th-TH', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+
+                const groupHeader = document.createElement('div');
+                groupHeader.className = 'text-xs font-semibold text-slate-400 pt-2 pb-1 px-1 flex justify-between items-center';
+                groupHeader.innerHTML = `<span>${formattedDate}</span>`;
+                listEl.appendChild(groupHeader);
+
+                grouped[dateStr].forEach(tx => {
+                    const isIncome = tx.type === 'income';
+                    const txCard = document.createElement('div');
+                    txCard.className = 'bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center justify-between hover:border-slate-300 transition-all group';
+                    txCard.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isIncome ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}">
+                                <i data-lucide="${isIncome ? 'arrow-down-left' : 'arrow-up-right'}" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-slate-900 leading-tight">${escapeHtml(tx.note)}</h4>
+                                <span class="text-xs text-slate-400">${escapeHtml(tx.category)}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                <div class="text-sm font-bold ${isIncome ? 'text-emerald-600' : 'text-slate-900'}">
+                                    ${isIncome ? '+' : '-'}${formatCurrency(tx.amount)}
+                                </div>
+                            </div>
+                            <button onclick="deleteTransaction('${tx.id}')" class="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all" title="ลบรายการนี้">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                    listEl.appendChild(txCard);
+                });
+            });
+
+            lucide.createIcons();
+        }
+
+        // Dynamic Quick Suggestions Chips for Description
+        function updateSuggestions() {
+            const container = document.getElementById('quickSuggestionsContainer');
+            const chipsEl = document.getElementById('quickSuggestions');
+            
+            // Extract unique past descriptions
+            const uniqueNotes = Array.from(new Set(transactions.map(t => t.note))).filter(Boolean).slice(0, 10);
+
+            if (uniqueNotes.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            chipsEl.innerHTML = '';
+
+            uniqueNotes.forEach(note => {
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg transition-all border border-slate-200/60 font-medium active:scale-95';
+                chip.textContent = note;
+                chip.onclick = () => {
+                    document.getElementById('txNote').value = note;
+                };
+                chipsEl.appendChild(chip);
+            });
+        }
+
+        // Filter Tabs Handling
+        function setFilterType(type) {
+            currentFilter = type;
+            const tabs = { all: 'tabAll', income: 'tabIncome', expense: 'tabExpense' };
+            Object.keys(tabs).forEach(t => {
+                const btn = document.getElementById(tabs[t]);
+                if (t === type) {
+                    btn.className = "px-3 py-1 rounded-lg bg-slate-900 text-white transition-all";
+                } else {
+                    btn.className = "px-3 py-1 rounded-lg hover:bg-slate-100 transition-all";
+                }
+            });
+            renderTransactions();
+        }
+
+        // Delete Individual Transaction
+        function deleteTransaction(id) {
+            showConfirm("ยืนยันการลบรายการ", "คุณต้องการลบรายการบันทึกนี้ออกจากระบบใช่หรือไม่?", (confirmed) => {
+                if (confirmed) {
+                    transactions = transactions.filter(t => t.id !== id);
+                    saveDataLocally();
+                    renderTransactions();
+                    updateSuggestions();
+                    showToast('ลบรายการเรียบร้อยแล้ว', 'info');
+                }
+            });
+        }
+
+        // Save to LocalStorage
+        function saveDataLocally() {
+            localStorage.setItem('flowfinance_txs', JSON.stringify(transactions));
+        }
+
+        // Modal Controls
+        function openSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            const container = document.getElementById('settingsModalContainer');
+            document.getElementById('sheetApiUrl').value = syncApiUrl;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                container.classList.remove('scale-95');
+                container.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            const container = document.getElementById('settingsModalContainer');
+            modal.classList.add('opacity-0');
+            container.classList.remove('scale-100');
+            container.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        // Confirmation Modal Dialog
+        function showConfirm(title, message, callback) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            document.getElementById('confirmModal').classList.remove('hidden');
+            pendingConfirmAction = callback;
+        }
+
+        function closeConfirmModal(result) {
+            document.getElementById('confirmModal').classList.add('hidden');
+            if (pendingConfirmAction) {
+                pendingConfirmAction(result);
+                pendingConfirmAction = null;
+            }
+        }
+
+        function confirmClearAll() {
+            showConfirm("ล้างข้อมูลทั้งหมด", "รายการบันทึกทั้งหมดในเครื่องนี้จะถูกลบอย่างถาวร", (confirmed) => {
+                if (confirmed) {
+                    transactions = [];
+                    saveDataLocally();
+                    renderTransactions();
+                    updateSuggestions();
+                    closeSettingsModal();
+                    showToast('ล้างข้อมูลเรียบร้อยแล้ว', 'info');
+                }
+            });
+        }
+
+        // Google Sheets API Sync Setup & Actions
+        function saveSyncSettings() {
+            const url = document.getElementById('sheetApiUrl').value.trim();
+            syncApiUrl = url;
+            localStorage.setItem('flowfinance_sync_url', url);
+            updateSyncStatusUI();
+            showToast('บันทึกการตั้งค่าซิงค์แล้ว', 'success');
+            if (url) fetchCloudData();
+        }
+
+        function updateSyncStatusUI() {
+            const dot = document.getElementById('syncDot');
+            const label = document.getElementById('syncLabel');
+
+            if (syncApiUrl) {
+                dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                label.textContent = "เชื่อมต่อคลาวด์อยู่";
+            } else {
+                dot.className = "w-2 h-2 rounded-full bg-slate-400";
+                label.textContent = "โหมดเครื่องนี้";
+            }
+        }
+
+        async function fetchCloudData() {
+            if (!syncApiUrl) return;
+            try {
+                showToast('กำลังดึงข้อมูลจากคลาวด์...', 'info');
+                const res = await fetch(syncApiUrl + '?action=get');
+                if (res.ok) {
+                    const cloudData = await res.json();
+                    if (Array.isArray(cloudData)) {
+                        transactions = cloudData;
+                        saveDataLocally();
+                        renderTransactions();
+                        updateSuggestions();
+                        showToast('ซิงค์ข้อมูลกับคลาวด์สำเร็จ!', 'success');
+                    }
+                }
+            } catch (err) {
+                console.error("Cloud fetch error:", err);
+                showToast('ไม่สามารถดึงข้อมูลจากคลาวด์ได้ ใช้ข้อมูลล่าสุดในเครื่องแทน', 'error');
+            }
+        }
+
+        async function syncToCloud(newRecord) {
+            if (!syncApiUrl) return;
+            try {
+                await fetch(syncApiUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(transactions)
+                });
+            } catch (err) {
+                console.error("Cloud post error:", err);
+            }
+        }
+
+        // Export Data (JSON & CSV)
+        function exportJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(transactions, null, 2));
+            triggerDownload(dataStr, `FlowFinance_Backup_${new Date().toISOString().split('T')[0]}.json`);
+        }
+
+        function exportCSV() {
+            if (transactions.length === 0) {
+                showToast('ไม่มีข้อมูลสำหรับส่งออก', 'error');
+                return;
+            }
+            let csv = '\uFEFF'; // UTF-8 BOM for Excel Thai language support
+            csv += 'ID,ประเภท,จำนวนเงิน,หมวดหมู่,วันที่,คำอธิบาย\n';
+            transactions.forEach(t => {
+                const typeName = t.type === 'income' ? 'รายรับ' : 'รายจ่าย';
+                csv += `"${t.id}","${typeName}",${t.amount},"${t.category}","${t.date}","${t.note.replace(/"/g, '""')}"\n`;
+            });
+            const dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+            triggerDownload(dataStr, `FlowFinance_Export_${new Date().toISOString().split('T')[0]}.csv`);
+        }
+
+        function importJSON(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    if (Array.isArray(imported)) {
+                        transactions = imported;
+                        saveDataLocally();
+                        renderTransactions();
+                        updateSuggestions();
+                        closeSettingsModal();
+                        showToast('นำเข้าข้อมูลสำเร็จแล้ว!', 'success');
+                    } else {
+                        throw new Error('โครงสร้างไฟล์ไม่ถูกต้อง');
+                    }
+                } catch (err) {
+                    showToast('ไฟล์ JSON ไม่ถูกต้อง', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function triggerDownload(url, filename) {
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", url);
+            dlAnchorElem.setAttribute("download", filename);
+            document.body.appendChild(dlAnchorElem);
+            dlAnchorElem.click();
+            dlAnchorElem.remove();
+        }
+
+        // Utilities
+        function formatCurrency(num) {
+            return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(num);
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function showToast(msg, type = 'info') {
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-emerald-900 text-emerald-100' : type === 'error' ? 'bg-rose-900 text-rose-100' : 'bg-slate-900 text-white';
+            
+            toast.className = `${bgColor} px-4 py-2.5 rounded-xl text-xs font-medium shadow-lg transition-all duration-300 transform translate-y-2 opacity-0 flex items-center gap-2 pointer-events-auto`;
+            toast.innerHTML = `<span>${msg}</span>`;
+
+            const container = document.getElementById('toastContainer');
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
