@@ -166,29 +166,35 @@
       </form>
     </div>
 
-    <!-- รายการย้อนหลัง & ตัวกรองแบบคลิกเลือกเดือน -->
+    <!-- รายการย้อนหลัง & ตัวกรอง -->
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-      <div class="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h2 class="text-base font-semibold text-slate-900 flex items-center gap-2">
-          <i data-lucide="list" class="w-5 h-5 text-slate-500"></i>
-          รายการย้อนหลัง
-        </h2>
+      <div class="p-5 border-b border-slate-100 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <h2 class="text-base font-semibold text-slate-900 flex items-center gap-2">
+            <i data-lucide="list" class="w-5 h-5 text-slate-500"></i>
+            รายการย้อนหลัง
+          </h2>
 
-        <!-- แผงคลิกเลือกเดือนแบบมินิมอล -->
-        <div class="flex flex-wrap items-center gap-2">
-          <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1">
-            <button onclick="changeMonth(-1)" class="p-1.5 text-slate-600 hover:bg-white rounded-lg transition-colors" title="เดือนก่อนหน้า">
-              <i data-lucide="chevron-left" class="w-4 h-4"></i>
-            </button>
-            <span id="currentMonthDisplay" class="px-3 text-xs font-semibold text-slate-700 min-w-[130px] text-center">กำลังโหลด...</span>
-            <button onclick="changeMonth(1)" class="p-1.5 text-slate-600 hover:bg-white rounded-lg transition-colors" title="เดือนถัดไป">
-              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          <!-- แผงคลิกเลือกเดือน -->
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1">
+              <button onclick="changeMonth(-1)" class="p-1.5 text-slate-600 hover:bg-white rounded-lg transition-colors" title="เดือนก่อนหน้า">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+              </button>
+              <span id="currentMonthDisplay" class="px-3 text-xs font-semibold text-slate-700 min-w-[130px] text-center">กำลังโหลด...</span>
+              <button onclick="changeMonth(1)" class="p-1.5 text-slate-600 hover:bg-white rounded-lg transition-colors" title="เดือนถัดไป">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <button onclick="toggleShowAllMonths()" id="showAllBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium px-3 py-2 rounded-xl transition-colors">
+              ดูทั้งหมด
             </button>
           </div>
-          <button onclick="toggleShowAllMonths()" id="showAllBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium px-3 py-2 rounded-xl transition-colors">
-            ดูทั้งหมด
-          </button>
-          <input type="text" id="searchInput" oninput="renderTransactions()" placeholder="ค้นหาข้อความ/หมวดหมู่..." class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none w-36 sm:w-44">
+        </div>
+
+        <!-- แผงเลือกหมวดหมู่แบบคลิก -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1" id="categoryFilterChips">
+          <span class="text-xs text-slate-400 whitespace-nowrap">หมวดหมู่:</span>
         </div>
       </div>
 
@@ -218,25 +224,94 @@
 
   </main>
 
-  <!-- Modal ตั้งค่า Google Sheets Sync -->
-  <div id="settingsModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <!-- Modal แก้ไขรายการ (Edit Modal) -->
+  <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 space-y-4">
       <div class="flex justify-between items-center">
         <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-          <i data-lucide="refresh-cw" class="w-5 h-5 text-slate-600"></i>
-          ตั้งค่าการซิงค์ - เจหวันนัน
+          <i data-lucide="edit-3" class="w-5 h-5 text-slate-600"></i>
+          แก้ไขรายการ
+        </h3>
+        <button onclick="toggleEditModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="editForm" onsubmit="handleUpdateTransaction(event)" class="space-y-3">
+        <input type="hidden" id="editId">
+        
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">ประเภท</label>
+            <select id="editType" onchange="updateEditCategories()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none">
+              <option value="expense">รายจ่าย</option>
+              <option value="income">รายรับ</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">หมวดหมู่</label>
+            <select id="editCategory" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none">
+              <!-- JS injects categories -->
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">จำนวนเงิน (บาท)</label>
+          <input type="number" id="editAmount" step="0.01" min="0" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">วันที่</label>
+          <input type="date" id="editDate" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">บันทึกข้อความ</label>
+          <input type="text" id="editNote" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none">
+        </div>
+
+        <button type="submit" class="w-full bg-slate-900 text-white font-medium py-2.5 rounded-xl text-xs hover:bg-slate-800 mt-2">
+          บันทึกการแก้ไข
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal ตั้งค่า -->
+  <div id="settingsModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <i data-lucide="settings" class="w-5 h-5 text-slate-600"></i>
+          ตั้งค่า - เจหวันนัน
         </h3>
         <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <p class="text-xs text-slate-500 leading-relaxed">
-        URL ของ Google Apps Script ถูกฝังไว้ถาวรแล้ว ข้อมูลจะทำการซิงค์กับ Google Sheets อัตโนมัติ
-      </p>
+      <!-- ส่วนเพิ่มหมวดหมู่ใหม่ -->
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 space-y-3">
+        <h4 class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+          <i data-lucide="folder-plus" class="w-4 h-4"></i> เพิ่มหมวดหมู่ใหม่
+        </h4>
+        <form onsubmit="handleAddNewCategory(event)" class="space-y-2">
+          <div class="grid grid-cols-2 gap-2">
+            <select id="newCatType" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none">
+              <option value="expense">หมวดหมู่รายจ่าย</option>
+              <option value="income">หมวดหมู่รายรับ</option>
+            </select>
+            <input type="text" id="newCatName" placeholder="ชื่อหมวดหมู่..." required class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none">
+          </div>
+          <button type="submit" class="w-full bg-slate-900 text-white font-medium py-2 rounded-lg text-xs hover:bg-slate-800">
+            + บันทึกหมวดหมู่ใหม่
+          </button>
+        </form>
+      </div>
 
       <div>
-        <label class="block text-xs font-medium text-slate-600 mb-1">Google Sheets Web App URL</label>
+        <label class="block text-xs font-medium text-slate-600 mb-1">Google Sheets Web App URL (ซิงค์อัตโนมัติ)</label>
         <input type="url" id="sheetUrlInput" class="w-full bg-slate-100 text-slate-500 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none cursor-not-allowed" readonly>
       </div>
 
@@ -256,35 +331,30 @@
       <hr class="border-slate-100">
 
       <div class="flex justify-between items-center text-xs">
-        <span class="text-slate-500">การสำรองไฟล์ฉุกเฉิน:</span>
-        <div class="flex gap-2">
-          <button onclick="exportJSON()" class="text-slate-600 underline">ดาวน์โหลด JSON</button>
-        </div>
+        <span class="text-slate-500">สำรองข้อมูลฉุกเฉิน:</span>
+        <button onclick="exportJSON()" class="text-slate-600 underline">ดาวน์โหลด JSON</button>
       </div>
     </div>
   </div>
 
   <!-- JavaScript Logics -->
   <script>
-    // รหัสผ่านถาวรสำหรับผู้ใช้ เจหวันนัน
     const USER_PASSWORD = "01042005";
 
-    // หมวดหมู่เริ่มต้น
-    const CATEGORIES = {
+    const DEFAULT_CATEGORIES = {
       expense: ['อาหาร/เครื่องดื่ม', 'เดินทาง/ค่าน้ำมัน', 'ของใช้ในบ้าน', 'ช้อปปิ้ง', 'ค่าหอพัก/น้ำไฟ', 'ความบันเทิง', 'อื่นๆ'],
       income: ['เงินเดือน', 'งานเสริม/ฟรีแลนซ์', 'ขายของ', 'การลงทุน', 'อื่นๆ']
     };
 
-    // ฝัง Web App URL ถาวร
+    let categories = JSON.parse(localStorage.getItem('flow_categories')) || DEFAULT_CATEGORIES;
     const FIXED_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyBP_Ijd9-1_Gqrr7jRA_Km3g8ZT_jWULmvgKhTTfF9reaBNoKpbw5ojYjOKAQnnOOxig/exec';
 
-    // สถานะแอป
     let transactions = JSON.parse(localStorage.getItem('flow_transactions')) || [];
     let webAppUrl = FIXED_SHEET_URL;
     let selectedYearMonth = new Date().toISOString().slice(0, 7);
     let isViewingAll = false;
+    let selectedCategoryFilter = 'ALL';
 
-    // ระบบล็อกรหัสผ่าน
     function handlePasswordSubmit(e) {
       e.preventDefault();
       const input = document.getElementById('passwordInput').value;
@@ -306,9 +376,7 @@
       document.getElementById('lockScreen').classList.remove('hidden');
     }
 
-    // เริ่มต้นระบบ
     document.addEventListener('DOMContentLoaded', () => {
-      // ตรวจสอบการผ่านรหัสผ่าน
       if (sessionStorage.getItem('flow_authenticated') === 'true') {
         document.getElementById('lockScreen').classList.add('hidden');
       } else {
@@ -320,6 +388,7 @@
 
       updateCategories();
       updateMonthDisplay();
+      renderCategoryFilterChips();
       renderTransactions();
       renderNoteSuggestions();
       lucide.createIcons();
@@ -329,11 +398,39 @@
       }
     });
 
+    function handleAddNewCategory(e) {
+      e.preventDefault();
+      const type = document.getElementById('newCatType').value;
+      const name = document.getElementById('newCatName').value.trim();
+
+      if (!name) return;
+
+      if (!categories[type].includes(name)) {
+        categories[type].push(name);
+        localStorage.setItem('flow_categories', JSON.stringify(categories));
+        updateCategories();
+        renderCategoryFilterChips();
+        document.getElementById('newCatName').value = '';
+        alert(`เพิ่มหมวดหมู่ "${name}" สำเร็จ!`);
+        toggleSettingsModal();
+      } else {
+        alert('มีหมวดหมู่นี้อยู่แล้วครับ');
+      }
+    }
+
     function updateCategories() {
       const type = document.getElementById('type').value;
       const categorySelect = document.getElementById('category');
-      categorySelect.innerHTML = CATEGORIES[type]
+      categorySelect.innerHTML = categories[type]
         .map(cat => `<option value="${cat}">${cat}</option>`)
+        .join('');
+    }
+
+    function updateEditCategories(selectedCat = '') {
+      const type = document.getElementById('editType').value;
+      const categorySelect = document.getElementById('editCategory');
+      categorySelect.innerHTML = categories[type]
+        .map(cat => `<option value="${cat}" ${cat === selectedCat ? 'selected' : ''}>${cat}</option>`)
         .join('');
     }
 
@@ -356,6 +453,48 @@
       document.getElementById('note').value = '';
     }
 
+    // เปิดหน้าต่างแก้ไขข้อมูล
+    function openEditModal(id) {
+      const tx = transactions.find(t => t.id === id);
+      if (!tx) return;
+
+      document.getElementById('editId').value = tx.id;
+      document.getElementById('editType').value = tx.type;
+      updateEditCategories(tx.category);
+      document.getElementById('editAmount').value = tx.amount;
+      document.getElementById('editDate').value = tx.date;
+      document.getElementById('editNote').value = tx.note || '';
+
+      toggleEditModal();
+    }
+
+    function toggleEditModal() {
+      document.getElementById('editModal').classList.toggle('hidden');
+    }
+
+    // บันทึกรายการที่แก้ไข
+    function handleUpdateTransaction(e) {
+      e.preventDefault();
+      const id = document.getElementById('editId').value;
+
+      transactions = transactions.map(t => {
+        if (t.id === id) {
+          return {
+            ...t,
+            type: document.getElementById('editType').value,
+            category: document.getElementById('editCategory').value,
+            amount: parseFloat(document.getElementById('editAmount').value),
+            date: document.getElementById('editDate').value,
+            note: document.getElementById('editNote').value.trim()
+          };
+        }
+        return t;
+      });
+
+      toggleEditModal();
+      saveLocalAndSync();
+    }
+
     function deleteTransaction(id) {
       if (confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
         transactions = transactions.filter(item => item.id !== id);
@@ -365,6 +504,7 @@
 
     function saveLocalAndSync() {
       localStorage.setItem('flow_transactions', JSON.stringify(transactions));
+      renderCategoryFilterChips();
       renderTransactions();
       renderNoteSuggestions();
 
@@ -413,12 +553,33 @@
       document.getElementById('showAllBtn').className = "bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium px-3 py-2 rounded-xl transition-colors";
     }
 
+    function renderCategoryFilterChips() {
+      const container = document.getElementById('categoryFilterChips');
+      const allCategories = [...new Set([...categories.expense, ...categories.income])];
+
+      let html = `<button onclick="filterByCategory('ALL')" class="px-3 py-1 rounded-xl text-xs font-medium transition-colors whitespace-nowrap ${selectedCategoryFilter === 'ALL' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">ทั้งหมด</button>`;
+
+      html += allCategories.map(cat => `
+        <button onclick="filterByCategory('${cat}')" class="px-3 py-1 rounded-xl text-xs font-medium transition-colors whitespace-nowrap ${selectedCategoryFilter === cat ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+          ${cat}
+        </button>
+      `).join('');
+
+      container.innerHTML = `<span class="text-xs text-slate-400 whitespace-nowrap">หมวดหมู่:</span>` + html;
+    }
+
+    function filterByCategory(cat) {
+      selectedCategoryFilter = cat;
+      renderCategoryFilterChips();
+      renderTransactions();
+    }
+
     function renderTransactions() {
       const listEl = document.getElementById('transactionList');
       const emptyEl = document.getElementById('emptyState');
-      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
 
       let filtered = transactions;
+
       if (!isViewingAll) {
         filtered = filtered.filter(t => t.date.startsWith(selectedYearMonth));
         const monthStr = document.getElementById('currentMonthDisplay').textContent;
@@ -447,11 +608,8 @@
       netEl.className = `text-2xl font-bold ${net < 0 ? 'text-rose-600' : 'text-slate-900'}`;
 
       let displayList = filtered;
-      if (searchQuery) {
-        displayList = displayList.filter(t => 
-          (t.note && t.note.toLowerCase().includes(searchQuery)) ||
-          t.category.toLowerCase().includes(searchQuery)
-        );
+      if (selectedCategoryFilter !== 'ALL') {
+        displayList = displayList.filter(t => t.category === selectedCategoryFilter);
       }
 
       if (displayList.length === 0) {
@@ -473,8 +631,11 @@
           <td class="px-5 py-3.5 whitespace-nowrap text-right font-medium text-sm ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-900'}">
             ${t.type === 'income' ? '+' : '-'}฿${t.amount.toLocaleString('th-TH', {minimumFractionDigits: 2})}
           </td>
-          <td class="px-5 py-3.5 whitespace-nowrap text-center">
-            <button onclick="deleteTransaction('${t.id}')" class="text-slate-400 hover:text-rose-600 transition-colors p-1">
+          <td class="px-5 py-3.5 whitespace-nowrap text-center space-x-1">
+            <button onclick="openEditModal('${t.id}')" class="text-slate-400 hover:text-sky-600 transition-colors p-1" title="แก้ไขรายการ">
+              <i data-lucide="edit-2" class="w-4 h-4"></i>
+            </button>
+            <button onclick="deleteTransaction('${t.id}')" class="text-slate-400 hover:text-rose-600 transition-colors p-1" title="ลบรายการ">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </td>
@@ -547,6 +708,7 @@
         if (Array.isArray(data)) {
           transactions = data;
           localStorage.setItem('flow_transactions', JSON.stringify(transactions));
+          renderCategoryFilterChips();
           renderTransactions();
           renderNoteSuggestions();
           updateSyncStatus('ดึงข้อมูลสำเร็จ', 'bg-emerald-500');
