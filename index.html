@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>บันทึกรายรับรายจ่าย - รายรับรายจ่ายจ้า</title>
+  <title>รายรับรายจ่ายจ้า</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -20,6 +20,30 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen pb-12">
 
+  <!-- หน้าจอล็อกรหัสผ่าน (Lock Screen) -->
+  <div id="lockScreen" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-8 shadow-2xl text-center space-y-6 border border-slate-100">
+      <div class="w-16 h-16 bg-slate-900 text-white rounded-2xl mx-auto flex items-center justify-center shadow-lg">
+        <i data-lucide="lock" class="w-8 h-8"></i>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">ยินดีต้อนรับ</h2>
+        <p class="text-sm font-medium text-emerald-600 mt-1">ผู้ใช้งาน: เจหวันนัน</p>
+        <p class="text-xs text-slate-400 mt-1">กรุณากรอกรหัสผ่านเพื่อเข้าใช้งาน</p>
+      </div>
+
+      <form onsubmit="handlePasswordSubmit(event)" class="space-y-4">
+        <div>
+          <input type="password" id="passwordInput" placeholder="••••••••" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-center text-lg tracking-widest focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all">
+          <p id="passwordError" class="text-xs text-rose-500 font-medium mt-2 hidden">รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</p>
+        </div>
+        <button type="submit" class="w-full bg-slate-900 text-white font-medium py-3 rounded-2xl hover:bg-slate-800 transition-colors shadow-md text-sm">
+          เข้าสู่ระบบ
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- Header -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
     <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -29,13 +53,19 @@
         </div>
         <div>
           <h1 class="text-xl font-bold text-slate-900 leading-tight">รายรับรายจ่ายจ้า</h1>
-          <p class="text-xs text-slate-500">บันทึกรายรับรายจ่ายของเจหวันนัน</p>
+          <p class="text-xs text-slate-500">ผู้ใช้งาน: <span class="font-semibold text-slate-700">เจหวันนัน</span></p>
         </div>
       </div>
-      <button onclick="toggleSettingsModal()" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors flex items-center gap-1.5 text-sm font-medium">
-        <i data-lucide="settings" class="w-5 h-5"></i>
-        <span class="hidden sm:inline">ตั้งค่าซิงค์</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <button onclick="lockApp()" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors flex items-center gap-1.5 text-xs font-medium" title="ออกจากระบบ / ล็อกหน้าจอ">
+          <i data-lucide="lock" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">ล็อกหน้าจอ</span>
+        </button>
+        <button onclick="toggleSettingsModal()" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors flex items-center gap-1.5 text-sm font-medium">
+          <i data-lucide="settings" class="w-5 h-5"></i>
+          <span class="hidden sm:inline">ตั้งค่า</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -194,7 +224,7 @@
       <div class="flex justify-between items-center">
         <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
           <i data-lucide="refresh-cw" class="w-5 h-5 text-slate-600"></i>
-          ตั้งค่าการซิงค์ข้อมูล - รายรับรายจ่ายจ้า
+          ตั้งค่าการซิงค์ - เจหวันนัน
         </h3>
         <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -236,6 +266,9 @@
 
   <!-- JavaScript Logics -->
   <script>
+    // รหัสผ่านถาวรสำหรับผู้ใช้ เจหวันนัน
+    const USER_PASSWORD = "01042005";
+
     // หมวดหมู่เริ่มต้น
     const CATEGORIES = {
       expense: ['อาหาร/เครื่องดื่ม', 'เดินทาง/ค่าน้ำมัน', 'ของใช้ในบ้าน', 'ช้อปปิ้ง', 'ค่าหอพัก/น้ำไฟ', 'ความบันเทิง', 'อื่นๆ'],
@@ -248,13 +281,40 @@
     // สถานะแอป
     let transactions = JSON.parse(localStorage.getItem('flow_transactions')) || [];
     let webAppUrl = FIXED_SHEET_URL;
-    
-    // ตัวแปรควบคุมการเลือกเดือน (รูปแบบ YYYY-MM หรือ 'ALL' สำหรับดูทั้งหมด)
     let selectedYearMonth = new Date().toISOString().slice(0, 7);
     let isViewingAll = false;
 
+    // ระบบล็อกรหัสผ่าน
+    function handlePasswordSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('passwordInput').value;
+      const errorEl = document.getElementById('passwordError');
+
+      if (input === USER_PASSWORD) {
+        document.getElementById('lockScreen').classList.add('hidden');
+        document.getElementById('passwordInput').value = '';
+        errorEl.classList.add('hidden');
+        sessionStorage.setItem('flow_authenticated', 'true');
+      } else {
+        errorEl.classList.remove('hidden');
+        document.getElementById('passwordInput').value = '';
+      }
+    }
+
+    function lockApp() {
+      sessionStorage.removeItem('flow_authenticated');
+      document.getElementById('lockScreen').classList.remove('hidden');
+    }
+
     // เริ่มต้นระบบ
     document.addEventListener('DOMContentLoaded', () => {
+      // ตรวจสอบการผ่านรหัสผ่าน
+      if (sessionStorage.getItem('flow_authenticated') === 'true') {
+        document.getElementById('lockScreen').classList.add('hidden');
+      } else {
+        document.getElementById('lockScreen').classList.remove('hidden');
+      }
+
       document.getElementById('date').value = new Date().toISOString().split('T')[0];
       document.getElementById('sheetUrlInput').value = webAppUrl;
 
@@ -269,7 +329,6 @@
       }
     });
 
-    // อัปเดตตัวเลือกหมวดหมู่ตามประเภท
     function updateCategories() {
       const type = document.getElementById('type').value;
       const categorySelect = document.getElementById('category');
@@ -278,7 +337,6 @@
         .join('');
     }
 
-    // เพิ่มรายการใหม่
     function handleAddTransaction(e) {
       e.preventDefault();
 
@@ -298,7 +356,6 @@
       document.getElementById('note').value = '';
     }
 
-    // ลบรายการ
     function deleteTransaction(id) {
       if (confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
         transactions = transactions.filter(item => item.id !== id);
@@ -306,7 +363,6 @@
       }
     }
 
-    // บันทึกลง LocalStorage และสั่งซิงค์ขึ้น Google Sheets
     function saveLocalAndSync() {
       localStorage.setItem('flow_transactions', JSON.stringify(transactions));
       renderTransactions();
@@ -317,7 +373,6 @@
       }
     }
 
-    // ฟังก์ชันเลื่อนเปลี่ยนเดือน (คลิกปุ่มลูกศรซ้าย/ขวา)
     function changeMonth(direction) {
       isViewingAll = false;
       let [year, month] = selectedYearMonth.split('-').map(Number);
@@ -336,7 +391,6 @@
       renderTransactions();
     }
 
-    // สลับโหมด ดูทั้งหมด / ดูรายเดือน
     function toggleShowAllMonths() {
       isViewingAll = !isViewingAll;
       const btn = document.getElementById('showAllBtn');
@@ -350,7 +404,6 @@
       renderTransactions();
     }
 
-    // แสดงชื่อเดือนภาษาไทยบนปุ่ม
     function updateMonthDisplay() {
       if (isViewingAll) return;
       const [year, month] = selectedYearMonth.split('-').map(Number);
@@ -360,13 +413,11 @@
       document.getElementById('showAllBtn').className = "bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium px-3 py-2 rounded-xl transition-colors";
     }
 
-    // แสดงผลรายการและคำนวณสรุปยอด
     function renderTransactions() {
       const listEl = document.getElementById('transactionList');
       const emptyEl = document.getElementById('emptyState');
       const searchQuery = document.getElementById('searchInput').value.toLowerCase();
 
-      // 1. กรองข้อมูลตามเดือนที่เลือก (หรือแสดงทั้งหมด)
       let filtered = transactions;
       if (!isViewingAll) {
         filtered = filtered.filter(t => t.date.startsWith(selectedYearMonth));
@@ -380,7 +431,6 @@
         document.getElementById('labelNetBalance').textContent = `คงเหลือสุทธิ (ทุกเดือน)`;
       }
 
-      // คำนวณยอดเงินรวม
       let income = 0;
       let expense = 0;
       filtered.forEach(t => {
@@ -396,7 +446,6 @@
       netEl.textContent = `฿${net.toLocaleString('th-TH', {minimumFractionDigits: 2})}`;
       netEl.className = `text-2xl font-bold ${net < 0 ? 'text-rose-600' : 'text-slate-900'}`;
 
-      // 2. กรองเพิ่มเติมด้วยช่องค้นหา
       let displayList = filtered;
       if (searchQuery) {
         displayList = displayList.filter(t => 
@@ -405,7 +454,6 @@
         );
       }
 
-      // แสดงตาราง
       if (displayList.length === 0) {
         listEl.innerHTML = '';
         emptyEl.classList.remove('hidden');
@@ -436,7 +484,6 @@
       lucide.createIcons();
     }
 
-    // สร้าง Chips ข้อความบันทึกย้อนหลัง
     function renderNoteSuggestions() {
       const container = document.getElementById('noteSuggestions');
       const uniqueNotes = [...new Set(transactions.map(t => t.note).filter(Boolean))].slice(0, 6);
@@ -467,7 +514,6 @@
       return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
     }
 
-    // --- ระบบซิงค์ Google Sheets ---
     function updateSyncStatus(text, colorClass) {
       const statusEl = document.getElementById('syncStatus');
       statusEl.innerHTML = `<span class="w-2 h-2 rounded-full ${colorClass}"></span> ${text}`;
