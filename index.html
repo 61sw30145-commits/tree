@@ -41,11 +41,11 @@
 
   <main class="max-w-4xl mx-auto px-4 mt-6 space-y-6">
 
-    <!-- Card สรุปยอดเงิน -->
+    <!-- Card สรุปยอดเงิน (อัปเดตตามเดือนที่เลือก) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
         <div class="flex items-center justify-between text-slate-500 mb-2">
-          <span class="text-sm font-medium">รายรับรวม</span>
+          <span class="text-sm font-medium" id="labelTotalIncome">รายรับรวม (ทุกเดือน)</span>
           <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
             <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
           </div>
@@ -55,7 +55,7 @@
 
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
         <div class="flex items-center justify-between text-slate-500 mb-2">
-          <span class="text-sm font-medium">รายจ่ายรวม</span>
+          <span class="text-sm font-medium" id="labelTotalExpense">รายจ่ายรวม (ทุกเดือน)</span>
           <div class="w-8 h-8 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center">
             <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
           </div>
@@ -65,7 +65,7 @@
 
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
         <div class="flex items-center justify-between text-slate-500 mb-2">
-          <span class="text-sm font-medium">คงเหลือสุทธิ</span>
+          <span class="text-sm font-medium" id="labelNetBalance">คงเหลือสุทธิ (ทุกเดือน)</span>
           <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center">
             <i data-lucide="scale" class="w-4 h-4"></i>
           </div>
@@ -126,7 +126,6 @@
           <!-- Chips ข้อความที่เคยพิมพ์ -->
           <div class="mt-2 flex flex-wrap items-center gap-1.5" id="noteSuggestions">
             <span class="text-[11px] text-slate-400">เคยใช้ล่าสุด:</span>
-            <!-- JS dynamically injects note chips -->
           </div>
         </div>
 
@@ -145,9 +144,13 @@
           รายการย้อนหลัง
         </h2>
 
-        <!-- ตัวค้นหาและกรอง -->
+        <!-- ตัวกรองรายเดือนและค้นหา -->
         <div class="flex flex-wrap items-center gap-2">
-          <input type="month" id="monthFilter" onchange="renderTransactions()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 focus:outline-none">
+          <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1">
+            <span class="text-xs text-slate-500">เดือน:</span>
+            <input type="month" id="monthFilter" onchange="renderTransactions()" class="bg-transparent text-xs text-slate-700 focus:outline-none">
+            <button onclick="clearMonthFilter()" title="แสดงทุกเดือน" class="text-slate-400 hover:text-slate-700 text-xs px-1">✕</button>
+          </div>
           <input type="text" id="searchInput" oninput="renderTransactions()" placeholder="ค้นหาข้อความ/หมวดหมู่..." class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 focus:outline-none w-36 sm:w-44">
         </div>
       </div>
@@ -192,18 +195,15 @@
       </div>
 
       <p class="text-xs text-slate-500 leading-relaxed">
-        วาง URL ของ Google Apps Script ที่ได้จากการเปิดสิทธิ์ Web App เพื่อซิงค์ข้อมูลกับ Google Sheets ของคุณ
+        URL ของ Google Apps Script ถูกฝังไว้ถาวรแล้ว ข้อมูลจะทำการซิงค์กับ Google Sheets อัตโนมัติ
       </p>
 
       <div>
         <label class="block text-xs font-medium text-slate-600 mb-1">Google Sheets Web App URL</label>
-        <input type="url" id="sheetUrlInput" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+        <input type="url" id="sheetUrlInput" class="w-full bg-slate-100 text-slate-500 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none cursor-not-allowed" readonly>
       </div>
 
       <div class="pt-2 flex flex-col gap-2">
-        <button onclick="saveSettings()" class="w-full bg-slate-900 text-white font-medium py-2 rounded-xl text-xs hover:bg-slate-800">
-          บันทึก URL
-        </button>
         <div class="grid grid-cols-2 gap-2">
           <button onclick="manualUpload()" class="bg-emerald-50 text-emerald-700 font-medium py-2 rounded-xl text-xs hover:bg-emerald-100 flex items-center justify-center gap-1">
             <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
@@ -235,14 +235,23 @@
       income: ['เงินเดือน', 'งานเสริม/ฟรีแลนซ์', 'ขายของ', 'การลงทุน', 'อื่นๆ']
     };
 
+    // ฝัง Web App URL ถาวร
+    const FIXED_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyBP_Ijd9-1_Gqrr7jRA_Km3g8ZT_jWULmvgKhTTfF9reaBNoKpbw5ojYjOKAQnnOOxig/exec';
+
     // สถานะแอป
     let transactions = JSON.parse(localStorage.getItem('flow_transactions')) || [];
-    let webAppUrl = localStorage.getItem('flow_sheet_url') || '';
+    let webAppUrl = FIXED_SHEET_URL;
 
     // เริ่มต้นระบบ
     document.addEventListener('DOMContentLoaded', () => {
-      // ตั้งค่าวันที่ปัจจุบันในฟอร์ม
-      document.getElementById('date').value = new Date().toISOString().split('T')[0];
+      const today = new Date();
+      const currentYearMonth = today.toISOString().split('T')[0].slice(0, 7);
+
+      // ตั้งค่าวันที่ปัจจุบันในฟอร์มเพิ่มรายการ
+      document.getElementById('date').value = today.toISOString().split('T')[0];
+      
+      // ตั้งค่าเริ่มต้นช่องกรองเดือนเป็นเดือนปัจจุบัน
+      document.getElementById('monthFilter').value = currentYearMonth;
       document.getElementById('sheetUrlInput').value = webAppUrl;
 
       updateCategories();
@@ -250,7 +259,7 @@
       renderNoteSuggestions();
       lucide.createIcons();
 
-      // หากมี URL ให้พยายามดึงข้อมูลล่าสุดจาก Sheets มาอัปเดตอัตโนมัติเมื่อเปิดหน้า
+      // ดึงข้อมูลล่าสุดจาก Sheets มาอัปเดตอัตโนมัติเมื่อเปิดหน้า
       if (webAppUrl) {
         syncFromSheets(true);
       }
@@ -286,7 +295,7 @@
       document.getElementById('note').value = '';
     }
 
-    // ลบรายการ (พร้อมซิงค์ลบใน Google Sheets ทันที)
+    // ลบรายการ
     function deleteTransaction(id) {
       if (confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
         transactions = transactions.filter(item => item.id !== id);
@@ -296,46 +305,45 @@
 
     // บันทึกลง LocalStorage และสั่งซิงค์ขึ้น Google Sheets
     function saveLocalAndSync() {
-      // 1. เซฟลงเครื่อง
       localStorage.setItem('flow_transactions', JSON.stringify(transactions));
-      
-      // 2. อัปเดต UI
       renderTransactions();
       renderNoteSuggestions();
 
-      // 3. ซิงค์ไป Google Sheets อัตโนมัติ (ถ้ามี URL)
       if (webAppUrl) {
         syncToSheets(true);
       }
     }
 
-    // แสดงผลรายการและคำนวณสรุปยอด
+    // ล้างตัวกรองเดือนเพื่อให้แสดงทุกเดือน
+    function clearMonthFilter() {
+      document.getElementById('monthFilter').value = '';
+      renderTransactions();
+    }
+
+    // แสดงผลรายการและคำนวณสรุปยอด (แยกตามเดือนที่เลือก)
     function renderTransactions() {
       const listEl = document.getElementById('transactionList');
       const emptyEl = document.getElementById('emptyState');
       const monthFilter = document.getElementById('monthFilter').value;
       const searchQuery = document.getElementById('searchInput').value.toLowerCase();
 
-      let filtered = transactions;
-
-      // กรองตามเดือน
+      // 1. กรองเฉพาะรายการที่ตรงกับเดือนที่เลือก (สำหรับการ์ดสรุปยอดด้านบน)
+      let monthFiltered = transactions;
       if (monthFilter) {
-        filtered = filtered.filter(t => t.date.startsWith(monthFilter));
+        monthFiltered = monthFiltered.filter(t => t.date.startsWith(monthFilter));
+        document.getElementById('labelTotalIncome').textContent = `รายรับรวม (${formatThaiMonthYear(monthFilter)})`;
+        document.getElementById('labelTotalExpense').textContent = `รายจ่ายรวม (${formatThaiMonthYear(monthFilter)})`;
+        document.getElementById('labelNetBalance').textContent = `คงเหลือสุทธิ (${formatThaiMonthYear(monthFilter)})`;
+      } else {
+        document.getElementById('labelTotalIncome').textContent = `รายรับรวม (ทุกเดือน)`;
+        document.getElementById('labelTotalExpense').textContent = `รายจ่ายรวม (ทุกเดือน)`;
+        document.getElementById('labelNetBalance').textContent = `คงเหลือสุทธิ (ทุกเดือน)`;
       }
 
-      // กรองตามข้อความค้นหา
-      if (searchQuery) {
-        filtered = filtered.filter(t => 
-          (t.note && t.note.toLowerCase().includes(searchQuery)) ||
-          t.category.toLowerCase().includes(searchQuery)
-        );
-      }
-
-      // คำนวณยอดเงินรวม
+      // คำนวณยอดรวมจากเดือนที่กรอง
       let income = 0;
       let expense = 0;
-
-      filtered.forEach(t => {
+      monthFiltered.forEach(t => {
         if (t.type === 'income') income += t.amount;
         else expense += t.amount;
       });
@@ -348,16 +356,25 @@
       netEl.textContent = `฿${net.toLocaleString('th-TH', {minimumFractionDigits: 2})}`;
       netEl.className = `text-2xl font-bold ${net < 0 ? 'text-rose-600' : 'text-slate-900'}`;
 
-      // แสดงตาราง
-      if (filtered.length === 0) {
+      // 2. กรองเพิ่มด้วยช่องค้นหา (สำหรับตารางรายการด้านล่าง)
+      let displayList = monthFiltered;
+      if (searchQuery) {
+        displayList = displayList.filter(t => 
+          (t.note && t.note.toLowerCase().includes(searchQuery)) ||
+          t.category.toLowerCase().includes(searchQuery)
+        );
+      }
+
+      // แสดงผลตาราง
+      if (displayList.length === 0) {
         listEl.innerHTML = '';
         emptyEl.classList.remove('hidden');
         return;
       }
 
       emptyEl.classList.add('hidden');
-      listEl.innerHTML = filtered.map(t => `
-        <tr class="hover:bg-slate-50/80 transition-colors">
+      listEl.innerHTML = displayList.map(t => `
+        <tr class="hover:bg-slate-50/85 transition-colors">
           <td class="px-5 py-3.5 whitespace-nowrap text-xs text-slate-500">${formatThaiDate(t.date)}</td>
           <td class="px-5 py-3.5 whitespace-nowrap">
             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${t.type === 'income' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'}">
@@ -410,6 +427,13 @@
       return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
     }
 
+    function formatThaiMonthYear(yearMonthStr) {
+      if (!yearMonthStr) return '';
+      const [year, month] = yearMonthStr.split('-');
+      const d = new Date(year, month - 1, 1);
+      return d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+    }
+
     // --- ระบบซิงค์ Google Sheets ---
     function updateSyncStatus(text, colorClass) {
       const statusEl = document.getElementById('syncStatus');
@@ -454,20 +478,11 @@
       }
     }
 
-    function saveSettings() {
-      webAppUrl = document.getElementById('sheetUrlInput').value.trim();
-      localStorage.setItem('flow_sheet_url', webAppUrl);
-      toggleSettingsModal();
-      if (webAppUrl) syncFromSheets();
-    }
-
     function manualUpload() {
-      if (!webAppUrl) return alert('กรุณาระบุ URL ในหน้าตั้งค่าก่อน');
       syncToSheets();
     }
 
     function manualDownload() {
-      if (!webAppUrl) return alert('กรุณาระบุ URL ในหน้าตั้งค่าก่อน');
       syncFromSheets();
     }
 
