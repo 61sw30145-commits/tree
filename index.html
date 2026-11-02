@@ -141,7 +141,7 @@
             <input type="number" id="amount" step="0.01" min="0" placeholder="0.00" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all">
           </div>
 
-          <!-- วันที่ (เพิ่ม autocomplete="off" เพื่อกันเบราว์เซอร์จำค่าเก่า) -->
+          <!-- วันที่ -->
           <div>
             <label class="block text-xs font-medium text-slate-600 mb-1">วันที่</label>
             <input type="date" id="date" autocomplete="off" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all">
@@ -345,7 +345,9 @@
 
     let transactions = JSON.parse(localStorage.getItem('flow_transactions')) || [];
     let webAppUrl = FIXED_SHEET_URL;
-    let selectedYearMonth = new Date().toISOString().slice(0, 7);
+    
+    // ตั้งค่าเริ่มต้นหน้าจอให้แสดงเดือนพฤศจิกายน 2026 ทันที
+    let selectedYearMonth = '2026-11';
     let isViewingAll = false;
     let selectedCategoryFilter = 'ALL';
 
@@ -359,8 +361,6 @@
         document.getElementById('passwordInput').value = '';
         errorEl.classList.add('hidden');
         sessionStorage.setItem('flow_authenticated', 'true');
-        
-        // ** บังคับเคลียร์ช่องวันที่ให้ว่างเปล่าทันทีเมื่อปลดล็อกสำเร็จ (ป้องกันเบราว์เซอร์จำค่าวันที่เก่า) **
         document.getElementById('date').value = '';
       } else {
         errorEl.classList.remove('hidden');
@@ -377,11 +377,9 @@
       if (sessionStorage.getItem('flow_authenticated') === 'true') {
         document.getElementById('lockScreen').classList.add('hidden');
       } else {
-        document.getElementById('lockScreen').classList.add('hidden'); // ป้องกันหน้าค้าง
         document.getElementById('lockScreen').classList.remove('hidden');
       }
 
-      // ** บังคับเคลียร์ช่องวันที่ให้ว่างเปล่าทันทีตอนเปิดหน้าเว็บ เพื่อให้ผู้ใช้เลือกเองสดๆ โดยไม่มีค่าเก่ามาทับ **
       document.getElementById('date').value = '';
       document.getElementById('sheetUrlInput').value = webAppUrl;
 
@@ -436,7 +434,8 @@
     function handleAddTransaction(e) {
       e.preventDefault();
 
-      const txDate = document.getElementById('date').value; // ค่าวันที่ที่ผู้ใช้เลือกสดๆ จากปฏิทิน
+      // ดึงค่าสตริงวันที่ตรงๆ เช่น "2026-11-01" จากฟอร์มโดยไม่ผ่านระบบแปลง Date Object เพื่อตัดปัญหา Timezone
+      const txDate = document.getElementById('date').value; 
 
       const newTransaction = {
         id: 'tx_' + Date.now(),
@@ -449,6 +448,7 @@
 
       transactions.unshift(newTransaction);
 
+      // ตัดเอาเฉพาะปีและเดือนแบบตรงๆ เช่น "2026-11" เพื่อสลับหน้าจอไปเดือนนั้นทันที
       if (txDate) {
         selectedYearMonth = txDate.substring(0, 7);
         isViewingAll = false;
@@ -458,7 +458,7 @@
       saveLocalAndSync();
 
       document.getElementById('amount').value = '';
-      document.getElementById('date').value = ''; // เคลียร์ช่องวันที่หลังบันทึก
+      document.getElementById('date').value = '';
       document.getElementById('note').value = '';
     }
 
@@ -560,9 +560,10 @@
     function updateMonthDisplay() {
       if (isViewingAll) return;
       const [year, month] = selectedYearMonth.split('-').map(Number);
-      const d = new Date(year, month - 1, 1);
-      const monthName = d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-      document.getElementById('currentMonthDisplay').textContent = monthName;
+      const monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+      const monthName = monthNames[month - 1];
+      const thaiYear = year + 543;
+      document.getElementById('currentMonthDisplay').textContent = `${monthName} ${thaiYear}`;
       document.getElementById('showAllBtn').className = "bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium px-3 py-2 rounded-xl transition-colors";
     }
 
@@ -682,6 +683,7 @@
       document.getElementById('note').value = text;
     }
 
+    // ฟังก์ชันแสดงวันที่แบบแยกสตริงตรงๆ ป้องกันปัญหาวันที่ถอยหลังเพราะ Timezone
     function formatThaiDate(dateStr) {
       if (!dateStr) return '';
       const parts = dateStr.split('-');
